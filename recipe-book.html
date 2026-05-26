@@ -1002,10 +1002,8 @@ async function loadRecipesFromSheet() {
 
 async function saveRecipesToSheet(data) {
   try {
-    await fetch(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
+    const encoded = encodeURIComponent(JSON.stringify(data));
+    await fetch(GAS_URL + '?action=save&data=' + encoded);
   } catch(e) {
     alert('保存に失敗しました。通信状況を確認してください。');
   }
