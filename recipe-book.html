@@ -991,22 +991,37 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbzltcsc1WUqMLUxUkKpbT3U
 
 async function loadRecipesFromSheet() {
   try {
-    const res = await fetch(GAS_URL);
+    const res = await fetch(GAS_URL + '?t=' + Date.now());
     const json = await res.json();
     if (Array.isArray(json) && json.length > 0) return json;
   } catch(e) {}
-  // スプレッドシートが空の場合はシードデータを書き込んで返す
-  await saveRecipesToSheet(SEED_RECIPES);
   return SEED_RECIPES.map(r => ({...r}));
 }
 
 async function saveRecipesToSheet(data) {
   try {
-    const encoded = encodeURIComponent(JSON.stringify(data));
-    await fetch(GAS_URL + '?action=save&data=' + encoded);
+    const json = JSON.stringify(data);
+    // チャンク分割して送信
+    const CHUNK = 1000;
+    const chunks = [];
+    for (let i = 0; i < json.length; i += CHUNK) {
+      chunks.push(json.slice(i, i + CHUNK));
+    }
+    // 最初のリクエストでチャンク数を送信
+    await fetchGAS('init', chunks.length.toString());
+    for (let i = 0; i < chunks.length; i++) {
+      await fetchGAS('chunk', chunks[i], i);
+    }
+    await fetchGAS('commit', '');
   } catch(e) {
     alert('保存に失敗しました。通信状況を確認してください。');
   }
+}
+
+async function fetchGAS(action, data, index) {
+  const params = new URLSearchParams({ action, data: data || '', index: index !== undefined ? index : '' });
+  const res = await fetch(GAS_URL + '?' + params.toString());
+  return res.json();
 }
 
 // ===== State =====
