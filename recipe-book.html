@@ -1000,28 +1000,15 @@ async function loadRecipesFromSheet() {
 
 async function saveRecipesToSheet(data) {
   try {
-    const json = JSON.stringify(data);
-    // チャンク分割して送信
-    const CHUNK = 1000;
-    const chunks = [];
-    for (let i = 0; i < json.length; i += CHUNK) {
-      chunks.push(json.slice(i, i + CHUNK));
-    }
-    // 最初のリクエストでチャンク数を送信
-    await fetchGAS('init', chunks.length.toString());
-    for (let i = 0; i < chunks.length; i++) {
-      await fetchGAS('chunk', chunks[i], i);
-    }
-    await fetchGAS('commit', '');
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(data)
+    });
   } catch(e) {
     alert('保存に失敗しました。通信状況を確認してください。');
   }
-}
-
-async function fetchGAS(action, data, index) {
-  const params = new URLSearchParams({ action, data: data || '', index: index !== undefined ? index : '' });
-  const res = await fetch(GAS_URL + '?' + params.toString());
-  return res.json();
 }
 
 // ===== State =====
