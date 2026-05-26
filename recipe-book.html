@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="レシピ集">
+<meta name="theme-color" content="#3a2a1f">
+<title>わたしのレシピ帖</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #2a1f17;
+    --ink-soft: #4a3a2e;
+    --ink-mute: #806a5a;
+    --paper: #f5ede0;
+    --paper-warm: #ede0cc;
+    --paper-deep: #e0d0b8;
+    --accent: #b8431f;
+    --accent-deep: #8a3014;
+    --accent-soft: #d96a3d;
+    --leaf: #5a6e3a;
+    --gold: #c89a4a;
+    --shadow: rgba(58, 42, 31, 0.15);
+    --shadow-deep: rgba(58, 42, 31, 0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 400;
+    line-height: 1.7;
+    overscroll-behavior-y: contain;
+    min-height: 100vh;
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(184, 67, 31, 0.04) 0%, transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(90, 110, 58, 0.04) 0%, transparent 40%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.16 0 0 0 0 0.12 0 0 0 0 0.09 0 0 0 0.025 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .app {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 0 120px;
+    position: relative;
+  }
+
+  /* ===== Header ===== */
+  .header {
+    padding: 32px 24px 24px;
+    text-align: center;
+    position: relative;
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 1px;
+    background: var(--ink);
+    opacity: 0.4;
+  }
+
+  .header-mark {
+    display: inline-block;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--accent);
+    margin-bottom: 12px;
+    padding-left: 0.4em;
+  }
+
+  .header h1 {
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 700;
+    font-size: 34px;
+    letter-spacing: 0.05em;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .header .sub {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: var(--ink-mute);
+    margin-top: 10px;
+    padding-left: 0.3em;
+  }
+
+  /* ===== Search & Filters ===== */
+  .controls {
+    padding: 24px 20px 16px;
+    position: sticky;
+    top: 0;
+    background: var(--paper);
+    z-index: 10;
+    border-bottom: 1px solid var(--paper-deep);
+  }
+
+  .search {
+    position: relative;
+    margin-bottom: 14px;
+  }
+
+  .search input {
+    width: 100%;
+    padding: 14px 18px 14px 46px;
+    border: 1.5px solid var(--paper-deep);
+    background: var(--paper-warm);
+    border-radius: 2px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search input:focus {
+    border-color: var(--accent);
+  }
+
+  .search input::placeholder { color: var(--ink-mute); }
+
+  .search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    opacity: 0.5;
+  }
+
+  .filters {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 0 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .filters::-webkit-scrollbar { display: none; }
+
+  .chip {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    border: 1.5px solid var(--paper-deep);
+    background: transparent;
+    border-radius: 100px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .chip:hover { border-color: var(--ink-mute); }
+
+  .chip.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  /* ===== Recipe Cards ===== */
+  .recipes {
+    padding: 20px;
+    display: grid;
+    gap: 16px;
+  }
+
+  .recipe-count {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--ink-mute);
+    margin-bottom: 4px;
+    padding-left: 4px;
+  }
+
+  .recipe-count .num {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .card {
+    background: var(--paper-warm);
+    border: 1px solid var(--paper-deep);
+    border-radius: 4px;
+    padding: 22px 24px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--accent);
+    opacity: 0.6;
+  }
+
+  .card:active { transform: scale(0.98); }
+  .card:hover { box-shadow: 0 4px 12px var(--shadow); }
+
+  .card-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .card-cat {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    font-weight: 600;
+    padding: 3px 8px;
+    background: rgba(184, 67, 31, 0.08);
+    border-radius: 2px;
+  }
+
+  .card-fav {
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  .card h2 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .card-sub {
+    font-size: 13px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+  }
+
+  .card-tags {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 11px;
+    color: var(--ink-mute);
+    padding: 2px 8px;
+    background: var(--paper);
+    border-radius: 2px;
+    border: 1px solid var(--paper-deep);
+  }
+
+  /* ===== Empty State ===== */
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-mute);
+  }
+
+  .empty-mark {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 32px;
+    color: var(--paper-deep);
+    margin-bottom: 16px;
+  }
+
+  .empty-text {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+  }
+
+  /* ===== FAB ===== */
+  .fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    color: var(--paper);
+    font-size: 30px;
+    font-weight: 300;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(184, 67, 31, 0.4);
+    z-index: 20;
+    transition: transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+
+  .fab:active { transform: scale(0.92); }
+
+  /* PCなど画面が広い場合は、コンテンツ右端に揃える */
+  @media (min-width: 768px) {
+    .fab {
+      right: max(24px, calc(50vw - 336px));
+    }
+  }
+
+  /* ===== Detail View ===== */
+  .detail {
+    position: fixed;
+    inset: 0;
+    background: var(--paper);
+    z-index: 100;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-out;
+  }
+
+  .detail.open { transform: translateX(0); }
+
+  .detail-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 0 80px;
+  }
+
+  .detail-header {
+    padding: 20px 20px 16px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--paper-deep);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .back-btn, .icon-btn {
+    background: none;
+    border: none;
+    color: var(--ink);
+    cursor: pointer;
+    padding: 8px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .icon-btn { font-size: 22px; }
+
+  .detail-actions { display: flex; gap: 4px; }
+
+  .fav-btn.active { color: var(--accent); }
+
+  .detail-body {
+    padding: 32px 28px;
+  }
+
+  .detail-cat {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .detail-body h1 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.3;
+    margin-bottom: 16px;
+  }
+
+  .detail-body .desc {
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1.8;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--paper-deep);
+    margin-bottom: 28px;
+  }
+
+  .section-title {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent-deep);
+    margin-bottom: 14px;
+    margin-top: 28px;
+    padding-left: 12px;
+    border-left: 3px solid var(--accent);
+    letter-spacing: 0.1em;
+  }
+
+  .servings {
+    display: inline-block;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 13px;
+    color: var(--ink-mute);
+    margin-bottom: 14px;
+    padding: 4px 12px;
+    background: var(--paper-warm);
+    border-radius: 100px;
+  }
+
+  .recipe-text {
+    font-size: 15px;
+    line-height: 2;
+    color: var(--ink-soft);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .ingredients {
+    background: var(--paper-warm);
+    padding: 20px 22px;
+    border-radius: 4px;
+    border-left: 3px solid var(--leaf);
+  }
+
+  .ingredients .recipe-text { color: var(--ink); }
+
+  .tip {
+    background: rgba(200, 154, 74, 0.1);
+    padding: 16px 20px;
+    border-radius: 4px;
+    border-left: 3px solid var(--gold);
+    margin-top: 20px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--ink-soft);
+  }
+
+  .tip-label {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  /* ===== Modal (Add/Edit) ===== */
+  .modal-bg {
+    position: fixed;
+    inset: 0;
+    background: rgba(42, 31, 23, 0.5);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-bg.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .modal {
+    background: var(--paper);
+    width: 100%;
+    max-width: 720px;
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+    padding: 24px;
+  }
+
+  .modal-bg.open .modal { transform: translateY(0); }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--paper-deep);
+  }
+
+  .modal-header h2 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--ink-mute);
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  .field {
+    margin-bottom: 18px;
+  }
+
+  .field label {
+    display: block;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+  }
+
+  .field input,
+  .field textarea,
+  .field select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--paper-deep);
+    background: var(--paper-warm);
+    border-radius: 3px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.7;
+  }
+
+  .field textarea.large { min-height: 160px; }
+
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus {
+    border-color: var(--accent);
+  }
+
+  .field-hint {
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-top: 4px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--paper-deep);
+  }
+
+  .btn {
+    flex: 1;
+    padding: 14px;
+    border: 1.5px solid;
+    border-radius: 3px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .btn:active { opacity: 0.7; }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--paper);
+    border-color: var(--accent);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink-soft);
+    border-color: var(--paper-deep);
+  }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--accent-deep);
+    border-color: var(--accent-deep);
+  }
+
+  /* ===== Bottom Toolbar in Detail ===== */
+  .detail-tools {
+    display: flex;
+    gap: 10px;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--paper-deep);
+  }
+
+  /* ===== Export/Import ===== */
+  .data-tools {
+    padding: 12px 20px 0;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .data-btn {
+    background: none;
+    border: 1px solid var(--paper-deep);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 12px;
+    color: var(--ink-mute);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .data-btn:hover {
+    border-color: var(--ink-mute);
+    color: var(--ink);
+  }
+
+  /* ===== Animation ===== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card { animation: fadeUp 0.3s ease-out backwards; }
+  .card:nth-child(1) { animation-delay: 0.02s; }
+  .card:nth-child(2) { animation-delay: 0.05s; }
+  .card:nth-child(3) { animation-delay: 0.08s; }
+  .card:nth-child(4) { animation-delay: 0.11s; }
+  .card:nth-child(5) { animation-delay: 0.14s; }
+  .card:nth-child(n+6) { animation-delay: 0.17s; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="header-mark">RECIPE BOOK</div>
+    <h1>わたしのレシピ帖</h1>
+    <div class="sub">— 椎葉さんのお料理メモ —</div>
+  </header>
+
+  <div class="controls">
+    <div class="search">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="7"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+      <input type="text" id="searchInput" placeholder="材料や料理名で検索...">
+    </div>
+    <div class="filters" id="filters"></div>
+  </div>
+
+  <div class="data-tools">
+    <button class="data-btn" id="resetBtn">🗑 データをリセット</button>
+  </div>
+
+  <div class="recipes" id="recipeList"></div>
+</div>
+
+
+<button class="fab" id="addBtn" aria-label="レシピを追加">+</button>
+
+<!-- Detail View -->
+<div class="detail" id="detailView">
+  <div class="detail-inner">
+    <div class="detail-header">
+      <button class="back-btn" id="backBtn">← 一覧に戻る</button>
+      <div class="detail-actions">
+        <button class="icon-btn fav-btn" id="favBtn" aria-label="お気に入り">♡</button>
+        <button class="icon-btn" id="editBtn" aria-label="編集">✎</button>
+      </div>
+    </div>
+    <div class="detail-body" id="detailBody"></div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">レシピを追加</h2>
+      <button class="modal-close" id="modalClose">×</button>
+    </div>
+
+    <div class="field">
+      <label>料理名 <span style="color:var(--accent)">*</span></label>
+      <input type="text" id="fTitle" placeholder="例：にんじんのグラッセ">
+    </div>
+
+    <div class="field">
+      <label>カテゴリ</label>
+      <select id="fCategory">
+        <option value="主菜">主菜</option>
+        <option value="副菜">副菜</option>
+        <option value="お弁当">お弁当</option>
+        <option value="前菜・おつまみ">前菜・おつまみ</option>
+        <option value="ソース・調味料">ソース・調味料</option>
+        <option value="主食・ごはんもの">主食・ごはんもの</option>
+        <option value="汁物">汁物</option>
+        <option value="お菓子・デザート">お菓子・デザート</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>ひとこと説明</label>
+      <input type="text" id="fDesc" placeholder="例：フランス料理の付け合わせの定番">
+    </div>
+
+    <div class="field">
+      <label>分量（人数）</label>
+      <input type="text" id="fServings" placeholder="例：2人分">
+    </div>
+
+    <div class="field">
+      <label>材料 <span style="color:var(--accent)">*</span></label>
+      <textarea id="fIngredients" placeholder="例：&#10;にんじん 1本（約150g）&#10;バター 10g&#10;砂糖 小さじ1"></textarea>
+    </div>
+
+    <div class="field">
+      <label>作り方 <span style="color:var(--accent)">*</span></label>
+      <textarea id="fSteps" class="large" placeholder="作り方を順番に..."></textarea>
+    </div>
+
+    <div class="field">
+      <label>コツ・メモ（任意）</label>
+      <textarea id="fTips" placeholder="ポイントやアレンジ案など"></textarea>
+    </div>
+
+    <div class="field">
+      <label>タグ（カンマ区切り、任意）</label>
+      <input type="text" id="fTags" placeholder="例：簡単, 作り置き, 和風">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-danger" id="deleteBtn" style="display:none">削除</button>
+      <button class="btn btn-secondary" id="cancelBtn">キャンセル</button>
+      <button class="btn btn-primary" id="saveBtn">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== データはlocalStorageに保存される =====
+// 編集・追加・削除・お気に入り変更のたびに自動保存される。
+
+// ===== シードデータ（初回起動時のみ使用） =====
+const SEED_RECIPES = [
+  {
+    id: 'r1',
+    title: 'にんじんのグラッセ',
+    category: '副菜',
+    desc: 'フランス料理の付け合わせの定番',
+    servings: '2人分',
+    ingredients: 'にんじん 1本（約150g）\nバター 10g\n砂糖 小さじ1\n塩 ひとつまみ\n水 ひたひた（約100〜150ml）',
+    steps: '1. にんじんは皮をむき、1cm厚さの輪切りにする。面取りすると煮崩れしにくく、見た目もきれいに。\n\n2. 鍋ににんじんを並べ、水をひたひたに注ぎ、バター・砂糖・塩を加える。\n\n3. 落とし蓋（アルミホイルでも可）をして中火にかけ、煮立ったら弱めの中火で10〜15分ほど煮る。\n\n4. にんじんが柔らかくなり、水分がほぼなくなって照りが出てきたら完成。最後は鍋を揺すりながらバターと煮汁をにんじんに絡めるとツヤよく仕上がる。',
+    tips: '水分を飛ばしすぎないこと。焦げる前に火を止めて、煮汁のとろみでコーティングするイメージ。お肉料理の付け合わせにぴったり。',
+    tags: ['フレンチ', '付け合わせ', '簡単'],
+    favorite: true,
+    createdAt: '2026-04-27'
+  },
+  {
+    id: 'r2',
+    title: '赤ワインステーキソース',
+    category: 'ソース・調味料',
+    desc: 'ステーキを焼いた後のフライパンで作る本格ソース',
+    servings: '2人分',
+    ingredients: '赤ワイン 100cc\nビーフブロス（ビーフコンソメでも可）100cc\nバター（冷たいもの）20g\nにんにく 1かけ\nエシャロット（または玉ねぎ）1/4個\n醤油 小さじ1\nタイム 1枝（あれば）\n塩・黒こしょう 少々',
+    steps: '1. ステーキを焼いた後のフライパンをそのまま使う。みじん切りにしたエシャロットと潰したにんにくを中火で1〜2分炒める。\n\n2. 赤ワインを加え、フライパンの底をこそぎながら強火で半量になるまで煮詰める。タイムがあれば一緒に。\n\n3. ビーフブロスを加え、全体量が半分〜1/3になるまで中火でさらに煮詰める。\n\n4. 火を止め、小さく切った冷たいバターを加えてフライパンを揺すりながら素早く溶かし込む（モンテ・オ・ブール）。醤油で味を整え、塩・黒こしょうで調味して完成。',
+    tips: 'バターは必ず冷たいものを。温かいと分離してしまう。煮詰めが足りないとサラサラになるので、とろみが出るまでしっかり詰めるのがポイント。マスタード小さじ1やバルサミコ酢少量を加えると風味が増す。',
+    tags: ['フレンチ', 'ステーキ', 'ソース'],
+    favorite: false,
+    createdAt: '2026-04-07'
+  },
+  {
+    id: 'r3',
+    title: 'マグロのクロスティーニ',
+    category: '前菜・おつまみ',
+    desc: 'バゲットを焼いた本格イタリアン前菜',
+    servings: '約20個分',
+    ingredients: 'バゲット 1本（薄切り）\nマグロ（刺身用・赤身または中トロ）200g\nケイパー 大さじ1\n赤玉ねぎ 1/4個\nレモン汁 大さじ1\nオリーブオイル 大さじ2\n塩・黒こしょう 少々\nイタリアンパセリ 適量\nクリームチーズ（お好みで）50g',
+    steps: '1. バゲットを1cm厚に切り、オリーブオイルを薄く塗ってトースターで両面をこんがり焼く。\n\n2. 赤玉ねぎをみじん切りにして水にさらし、辛みを抜いてからよく水気を切る。\n\n3. マグロを5mm角のさいの目切りにする。あまり細かくしすぎないのがポイント。\n\n4. ボウルにマグロ、赤玉ねぎ、ケイパー、レモン汁、オリーブオイルを合わせて軽く混ぜ、塩・こしょうで味を整える。\n\n5. バゲットにクリームチーズを塗り（お好みで）、マグロのタルタルをのせる。\n\n6. イタリアンパセリを散らして完成。',
+    tips: 'マグロは直前まで冷蔵庫で冷やしておくと崩れにくい。アボカドを角切りにして加えるとコクとボリュームUP。ケイパーの代わりに刻んだ沢庵を使うと和風アレンジに。',
+    tags: ['イタリアン', 'パーティー', 'おつまみ'],
+    favorite: false,
+    createdAt: '2026-04-12'
+  },
+  {
+    id: 'r4',
+    title: 'マグロのクロスティーニ（簡単版）',
+    category: '前菜・おつまみ',
+    desc: 'マヨネーズ＆わさびで和風に仕上げる簡単版',
+    servings: '4人分',
+    ingredients: 'フランスパン 16枚（1cm厚）\nマグロ（刺身用）200g\nマヨネーズ 大さじ2\n醤油 小さじ1\nわさび 小さじ1/2\nレモン汁 少々（お好みで）\nバターまたはクリームチーズ 適量\nケッパー、刻み細ねぎ、大葉など 適量',
+    steps: '1. フランスパンを1cm厚に16枚切り、トースターで軽く焼く。\n\n2. マグロを細かく刻み、マヨネーズ、醤油、わさびと混ぜ合わせる。お好みでレモン汁少々を加えると爽やかに。\n\n3. 焼いたパンにバターまたはクリームチーズを薄く塗り、マグロのタルタルをのせる。\n\n4. 仕上げにケッパーや刻んだ細ねぎ、小口切りの大葉などをトッピング。',
+    tips: 'パンは食べる直前に焼くとサクサク感が保てる。マグロは水分が出やすいのでタルタルは食べる30分前に作るのがベスト。アボカドを薄切りにして一緒にのせるとボリュームUP。',
+    tags: ['和風', '簡単', 'おつまみ'],
+    favorite: false,
+    createdAt: '2026-04-12'
+  },
+  {
+    id: 'r5',
+    title: 'ベーコンとミニトマトのキッシュ風パイ',
+    category: '主菜',
+    desc: '冷凍パイシートで簡単・華やか',
+    servings: 'パイシート2枚分',
+    ingredients: '冷凍パイシート 2枚\nベーコン 4枚\nミニトマト 8〜10個\nタマネギ 1/2個\n卵 2個\n牛乳 100ml\n粉チーズ 大さじ2\n塩こしょう 少々\nオリーブオイル 小さじ1',
+    steps: '1. 冷凍パイシートは室温で5分ほど解凍する。オーブンを200℃に予熱。\n\n2. タマネギは薄切り、ベーコンは1cm幅に切る。ミニトマトは半分にカット。\n\n3. フライパンにオリーブオイルを熱し、タマネギとベーコンを中火で炒める。タマネギがしんなりしたら火を止めて冷ます。\n\n4. ボウルに卵、牛乳、粉チーズ、塩こしょうを入れて混ぜる。\n\n5. 天板にクッキングシートを敷き、パイシートを並べる。フチを1cmほど内側に折り込んで土手を作り、フォークで底面に空気穴を開ける。\n\n6. 炒めた具材をのせ、卵液を流し入れ、ミニトマトを切り口を上にして並べる。\n\n7. 200℃のオーブンで20〜25分、パイがきつね色になるまで焼く。',
+    tips: 'タマネギを炒める手間を省きたい場合は生のままスライスして直接のせてもOK。お好みで黒こしょうやドライバジルを振ると風味UP。',
+    tags: ['オーブン', 'パイ', 'おもてなし'],
+    favorite: false,
+    createdAt: '2026-04-26'
+  },
+  {
+    id: 'r6',
+    title: '合い挽き肉と新玉ねぎのそぼろ',
+    category: 'お弁当',
+    desc: '新玉ねぎの甘みが生きるお弁当の定番',
+    servings: '2〜3人分',
+    ingredients: '合い挽き肉 200g\n新玉ねぎ 1/2個（約100g）\nしょうが（すりおろし）小さじ1\nサラダ油 小さじ1\n\n【調味料】\nしょうゆ 大さじ2\n砂糖 大さじ1と1/2\nみりん 大さじ1\n酒 大さじ1\n味噌 小さじ1（コクUP、なくても可）',
+    steps: '1. 新玉ねぎはみじん切りにする。調味料は合わせておく。\n\n2. フライパンにサラダ油を熱し、しょうがを入れて香りが出たら合い挽き肉を加える。中火で肉をほぐしながら炒める。\n\n3. 肉の色が変わったら新玉ねぎを加え、玉ねぎが透き通るまで2〜3分炒める。\n\n4. 合わせた調味料を加え、中火で汁気がほぼなくなるまで5〜7分炒め煮にする。焦げやすいので時々混ぜる。\n\n5. 味をみて、薄ければしょうゆを少し足して調整する。',
+    tips: '汁気をしっかり飛ばすとごはんがベタつかない。冷ましてから詰める。冷蔵で3日、冷凍で2週間保存可能。いり卵や青菜のおひたしと3色弁当にするときれい。生姜がない場合はにんにく小さじ1/2や白ごま、黒こしょうで代用可。',
+    tags: ['作り置き', 'お弁当', '簡単'],
+    favorite: true,
+    createdAt: '2026-04-19'
+  },
+  {
+    id: 'r7',
+    title: 'キャベツとベーコンの塩昆布炒め',
+    category: 'お弁当',
+    desc: '塩昆布の旨味だけで味が決まる時短おかず',
+    servings: '2〜3人分',
+    ingredients: 'キャベツ 1/4個（約200g）\nベーコン 2枚\n塩昆布 大さじ1\nごま油 小さじ2\n黒こしょう 少々',
+    steps: '1. キャベツはざく切り、ベーコンは1cm幅に切る。\n\n2. フライパンにごま油を熱してベーコンを炒め、脂が出たらキャベツを加えて中火で炒める。\n\n3. しんなりしたら塩昆布を加えて全体を混ぜ、黒こしょうで仕上げる。',
+    tips: '時短で失敗しにくいので忙しい朝にもおすすめ。冷めても美味しい。',
+    tags: ['時短', '簡単', '作り置き'],
+    favorite: false,
+    createdAt: '2026-04-29'
+  },
+  {
+    id: 'r8',
+    title: 'キャベツのごま味噌和え',
+    category: '副菜',
+    desc: '前日に作っておけるお弁当向き副菜',
+    servings: '2人分',
+    ingredients: 'キャベツ 150g\n味噌 小さじ2\nすりごま 大さじ1\n砂糖 小さじ1\nしょうゆ 小さじ1/2',
+    steps: '1. キャベツをざく切りにして、塩少々（分量外）を振った熱湯で30秒ほど茹で、ザルにあげてしっかり水気を絞る。\n\n2. 調味料を全て混ぜ合わせる。\n\n3. キャベツと和える。',
+    tips: '前日に作ってもOK。汁気が出にくいのでお弁当向き。',
+    tags: ['作り置き', '和風', 'お弁当'],
+    favorite: false,
+    createdAt: '2026-04-29'
+  },
+  {
+    id: 'r9',
+    title: 'キャベツとちくわのカレー炒め',
+    category: '副菜',
+    desc: 'スパイスの香りが食欲をそそる',
+    servings: '2人分',
+    ingredients: 'キャベツ 150g\nちくわ 2本\nカレー粉 小さじ1\nしょうゆ 小さじ1\nサラダ油 小さじ2',
+    steps: '1. キャベツは食べやすい大きさに、ちくわは斜め薄切りにする。\n\n2. フライパンに油を熱し、ちくわとキャベツを炒める。\n\n3. しんなりしたらカレー粉としょうゆを加えて炒め合わせる。',
+    tips: '彩りもいいので、お弁当のおかずにもおすすめ。',
+    tags: ['簡単', 'お弁当', 'スパイス'],
+    favorite: false,
+    createdAt: '2026-04-29'
+  },
+  {
+    id: 'r10',
+    title: '回鍋肉（ホイコーロー）',
+    category: '主菜',
+    desc: 'ごはんがすすむ定番中華',
+    servings: '2人分',
+    ingredients: '豚バラ薄切り肉 200g\nキャベツ 1/4個（約250g）\nピーマン 2個（あれば）\nにんにく 1かけ\nしょうが 1かけ\nごま油 大さじ1\n\n【合わせ調味料】\n味噌 大さじ1.5\n豆板醤 小さじ1\nしょうゆ 小さじ1\n砂糖 大さじ1\n酒 大さじ1',
+    steps: '1. キャベツはざく切り、ピーマンは乱切り、豚肉は食べやすい長さに切る。にんにくとしょうがはみじん切りに。\n\n2. 合わせ調味料は先に混ぜておく。\n\n3. フライパンにごま油とにんにく・しょうがを入れて弱火で香りを出し、豚肉を加えて中火で炒める。\n\n4. 色が変わったらキャベツとピーマンを加え、強めの中火で炒める。\n\n5. 野菜がしんなりしてきたら合わせ調味料を加え、全体に絡めて完成。',
+    tips: '豚バラを使うと脂のコクが出てより本格的な味わいに。',
+    tags: ['中華', '豚肉', '定番'],
+    favorite: false,
+    createdAt: '2026-04-29'
+  },
+  {
+    id: 'r11',
+    title: '豚肉とキャベツの重ね蒸し',
+    category: '主菜',
+    desc: 'ポン酢で食べるあっさり一品',
+    servings: '2人分',
+    ingredients: '豚バラ薄切り肉 200g\nキャベツ 1/4個（約250g）\n酒 大さじ2\nポン酢、ごま油、刻みねぎ 適量',
+    steps: '1. キャベツはざく切りにする。\n\n2. 鍋またはフライパンにキャベツの半量を敷き、豚肉の半量を広げてのせ、また残りのキャベツ、豚肉の順に重ねる。\n\n3. 酒を回しかけ、蓋をして弱めの中火で10〜12分蒸し焼きにする。\n\n4. 器に盛り、ポン酢とごま油、刻みねぎをかけていただく。',
+    tips: '素材の甘みが引き立つあっさりめの一品。蒸すだけなので簡単。',
+    tags: ['豚肉', 'あっさり', '蒸し料理'],
+    favorite: false,
+    createdAt: '2026-04-29'
+  },
+  {
+    id: 'r12',
+    title: '豚肉とキャベツの味噌バター炒め',
+    category: '主菜',
+    desc: '味噌のコクとバターの香りが食欲をそそる',
+    servings: '2人分',
+    ingredients: '豚こま切れ肉 200g\nキャベツ 1/4個（約250g）\nバター 15g\nにんにく 1かけ（すりおろし）\n\n【合わせ調味料】\n味噌 大さじ1.5\nみりん 大さじ1\nしょうゆ 小さじ1\n砂糖 小さじ1',
+    steps: '1. キャベツはざく切り、豚肉は食べやすい大きさに切る。合わせ調味料は混ぜておく。\n\n2. フライパンにバターを溶かし、にんにくと豚肉を炒める。\n\n3. 色が変わったらキャベツを加えて炒め、しんなりしたら合わせ調味料を加えて絡める。',
+    tips: '子どもにも人気の味付け。豚こま切れで手軽に。',
+    tags: ['豚肉', '味噌', '簡単'],
+    favorite: false,
+    createdAt: '2026-04-29'
+  },
+  {
+    id: 'r13',
+    title: '鶏もも肉の照り焼き 山椒風味',
+    category: '主菜',
+    desc: 'タレをしっかり絡めてごはんがすすむ定番照り焼き。大人は山椒の葉をのせて',
+    servings: '鶏もも肉2枚分',
+    ingredients: '鶏もも肉（切り身）2枚分\nサラダ油 大さじ1\n山椒の葉 適量（大人用・仕上げに）\n\n【タレ】\n醤油 大さじ2\nみりん 大さじ2\n酒 大さじ1と1/2\n砂糖 小さじ2',
+    steps: '1. タレの材料を合わせておく。\n\n2. フライパンに油を熱し、鶏肉を皮目を下にして中火で並べる。触らずに4〜5分焼き、皮がこんがりしたら裏返してさらに3分焼く。\n\n3. 余分な脂をキッチンペーパーで軽く拭き取り、タレを加えて中火で煮絡める。フライパンを揺すりながら、タレにとろみが出て照りよく絡まるまで1〜2分。\n\n4. 子ども分を先に取り分け、残りに山椒の葉をちぎってのせる。',
+    tips: 'タレを絡めるとき火が強すぎると焦げやすいので、中火をキープして。とろみが出るまでしっかり煮絡めるとごはんがすすむ仕上がりになります。タレは倍量作ってごはんにかけてもおいしいです。',
+    tags: ['和食', '鶏肉', '照り焼き', '山椒', '子ども向け'],
+    favorite: true,
+    createdAt: '2026-05-25'
+  }
+]/* SEED_DATA_END */;
+
+// ===== Google Apps Script 連携 =====
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzltcsc1WUqMLUxUkKpbT3UHOF3w3gSfdA_JooTVZMe9Jqfg5OrXMbW3vhyz9MtfQ4i-A/exec';
+
+async function loadRecipesFromSheet() {
+  try {
+    const res = await fetch(GAS_URL);
+    const json = await res.json();
+    if (Array.isArray(json) && json.length > 0) return json;
+  } catch(e) {}
+  // スプレッドシートが空の場合はシードデータを書き込んで返す
+  await saveRecipesToSheet(SEED_RECIPES);
+  return SEED_RECIPES.map(r => ({...r}));
+}
+
+async function saveRecipesToSheet(data) {
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  } catch(e) {
+    alert('保存に失敗しました。通信状況を確認してください。');
+  }
+}
+
+// ===== State =====
+let currentFilter = 'all';
+let currentSearch = '';
+let currentRecipeId = null;
+let editingId = null;
+let recipes = [];
+
+// ===== ローディング表示 =====
+function showLoading() {
+  document.getElementById('recipeList').innerHTML = `
+    <div class="empty">
+      <div class="empty-mark">— 読み込み中 —</div>
+      <div class="empty-text">レシピを取得しています...</div>
+    </div>`;
+}
+
+async function initApp() {
+  showLoading();
+  recipes = await loadRecipesFromSheet();
+  renderFilters();
+  renderList();
+}
+
+// ===== Render =====
+function getCategories() {
+  const set = new Set(recipes.map(r => r.category));
+  return ['all', 'お気に入り', ...Array.from(set)];
+}
+
+function renderFilters() {
+  const cats = getCategories();
+  const html = cats.map(c => {
+    const label = c === 'all' ? 'すべて' : c;
+    const active = c === currentFilter ? 'active' : '';
+    return `<button class="chip ${active}" data-cat="${c}">${label}</button>`;
+  }).join('');
+  document.getElementById('filters').innerHTML = html;
+  document.querySelectorAll('.chip').forEach(b => {
+    b.addEventListener('click', () => {
+      currentFilter = b.dataset.cat;
+      renderFilters();
+      renderList();
+    });
+  });
+}
+
+function getFiltered() {
+  let result = recipes;
+  if (currentFilter === 'お気に入り') {
+    result = result.filter(r => r.favorite);
+  } else if (currentFilter !== 'all') {
+    result = result.filter(r => r.category === currentFilter);
+  }
+  if (currentSearch.trim()) {
+    const q = currentSearch.trim().toLowerCase();
+    result = result.filter(r => {
+      const blob = [r.title, r.desc, r.ingredients, r.steps, r.tips, (r.tags || []).join(' ')].join(' ').toLowerCase();
+      return blob.includes(q);
+    });
+  }
+  return result.slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+}
+
+function renderList() {
+  const list = getFiltered();
+  const root = document.getElementById('recipeList');
+  if (list.length === 0) {
+    root.innerHTML = `
+      <div class="empty">
+        <div class="empty-mark">— 本日のお品書きなし —</div>
+        <div class="empty-text">右下の＋ボタンからレシピを追加できます</div>
+      </div>`;
+    return;
+  }
+  const countHtml = `<div class="recipe-count">全 <span class="num">${list.length}</span> 品</div>`;
+  const cardsHtml = list.map(r => {
+    const tags = (r.tags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+    return `
+      <div class="card" data-id="${r.id}">
+        <div class="card-meta">
+          <span class="card-cat">${escapeHtml(r.category)}</span>
+          ${r.favorite ? '<span class="card-fav">♥</span>' : ''}
+        </div>
+        <h2>${escapeHtml(r.title)}</h2>
+        ${r.desc ? `<div class="card-sub">${escapeHtml(r.desc)}</div>` : ''}
+        ${tags ? `<div class="card-tags">${tags}</div>` : ''}
+      </div>`;
+  }).join('');
+  root.innerHTML = countHtml + cardsHtml;
+  document.querySelectorAll('.card').forEach(c => {
+    c.addEventListener('click', () => openDetail(c.dataset.id));
+  });
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// ===== Detail View =====
+function openDetail(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+  currentRecipeId = id;
+  const tags = (r.tags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-cat">${escapeHtml(r.category)}</div>
+    <h1>${escapeHtml(r.title)}</h1>
+    ${r.desc ? `<div class="desc">${escapeHtml(r.desc)}</div>` : ''}
+
+    <div class="section-title">材料</div>
+    ${r.servings ? `<div class="servings">${escapeHtml(r.servings)}</div>` : ''}
+    <div class="ingredients"><div class="recipe-text">${escapeHtml(r.ingredients)}</div></div>
+
+    <div class="section-title">作り方</div>
+    <div class="recipe-text">${escapeHtml(r.steps)}</div>
+
+    ${r.tips ? `
+      <div class="tip">
+        <span class="tip-label">— コツ・メモ —</span>
+        ${escapeHtml(r.tips)}
+      </div>` : ''}
+
+    ${tags ? `<div class="card-tags" style="margin-top:24px">${tags}</div>` : ''}
+  `;
+
+  const fav = document.getElementById('favBtn');
+  fav.textContent = r.favorite ? '♥' : '♡';
+  fav.classList.toggle('active', !!r.favorite);
+
+  document.getElementById('detailView').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('detailView').classList.remove('open');
+  document.body.style.overflow = '';
+  currentRecipeId = null;
+}
+
+// ===== Modal =====
+function openModal(id) {
+  editingId = id || null;
+  const m = document.getElementById('modalBg');
+  const r = id ? recipes.find(x => x.id === id) : null;
+  document.getElementById('modalTitle').textContent = r ? 'レシピを編集' : 'レシピを追加';
+  document.getElementById('fTitle').value = r ? r.title : '';
+  document.getElementById('fCategory').value = r ? r.category : '主菜';
+  document.getElementById('fDesc').value = r ? (r.desc || '') : '';
+  document.getElementById('fServings').value = r ? (r.servings || '') : '';
+  document.getElementById('fIngredients').value = r ? r.ingredients : '';
+  document.getElementById('fSteps').value = r ? r.steps : '';
+  document.getElementById('fTips').value = r ? (r.tips || '') : '';
+  document.getElementById('fTags').value = r ? (r.tags || []).join(', ') : '';
+  document.getElementById('deleteBtn').style.display = r ? 'block' : 'none';
+  m.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('open');
+  if (!document.getElementById('detailView').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
+  editingId = null;
+}
+
+async function saveRecipe() {
+  const title = document.getElementById('fTitle').value.trim();
+  const ingredients = document.getElementById('fIngredients').value.trim();
+  const steps = document.getElementById('fSteps').value.trim();
+  if (!title || !ingredients || !steps) {
+    alert('料理名・材料・作り方は必須です');
+    return;
+  }
+  const data = {
+    title,
+    category: document.getElementById('fCategory').value,
+    desc: document.getElementById('fDesc').value.trim(),
+    servings: document.getElementById('fServings').value.trim(),
+    ingredients,
+    steps,
+    tips: document.getElementById('fTips').value.trim(),
+    tags: document.getElementById('fTags').value.split(',').map(t => t.trim()).filter(Boolean),
+  };
+  if (editingId) {
+    const idx = recipes.findIndex(r => r.id === editingId);
+    recipes[idx] = { ...recipes[idx], ...data };
+  } else {
+    const id = 'r' + Date.now();
+    const today = new Date().toISOString().slice(0, 10);
+    recipes.unshift({ id, ...data, favorite: false, createdAt: today });
+  }
+  await saveRecipesToSheet(recipes);
+  closeModal();
+  renderFilters();
+  renderList();
+  if (editingId && currentRecipeId === editingId) openDetail(editingId);
+}
+
+async function deleteRecipe() {
+  if (!editingId) return;
+  if (!confirm('このレシピを削除しますか？')) return;
+  recipes = recipes.filter(r => r.id !== editingId);
+  await saveRecipesToSheet(recipes);
+  closeModal();
+  closeDetail();
+  renderFilters();
+  renderList();
+}
+
+async function toggleFav() {
+  if (!currentRecipeId) return;
+  const r = recipes.find(x => x.id === currentRecipeId);
+  r.favorite = !r.favorite;
+  await saveRecipesToSheet(recipes);
+  const fav = document.getElementById('favBtn');
+  fav.textContent = r.favorite ? '♥' : '♡';
+  fav.classList.toggle('active', r.favorite);
+  renderFilters();
+  renderList();
+}
+
+// ===== Events =====
+document.getElementById('addBtn').addEventListener('click', () => openModal());
+document.getElementById('backBtn').addEventListener('click', closeDetail);
+document.getElementById('editBtn').addEventListener('click', () => openModal(currentRecipeId));
+document.getElementById('favBtn').addEventListener('click', toggleFav);
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+document.getElementById('saveBtn').addEventListener('click', saveRecipe);
+document.getElementById('deleteBtn').addEventListener('click', deleteRecipe);
+document.getElementById('searchInput').addEventListener('input', e => {
+  currentSearch = e.target.value;
+  renderList();
+});
+document.getElementById('modalBg').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ===== データリセット =====
+document.getElementById('resetBtn').addEventListener('click', async () => {
+  if (!confirm('すべてのレシピをリセットしますか？\n（初期データに戻ります。この操作は元に戻せません）')) return;
+  await saveRecipesToSheet(SEED_RECIPES);
+  recipes = SEED_RECIPES.map(r => ({...r}));
+  currentFilter = 'all';
+  currentSearch = '';
+  document.getElementById('searchInput').value = '';
+  renderFilters();
+  renderList();
+});
+
+// Init
+initApp();
+</script>
+</body>
+</html>
