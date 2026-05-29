@@ -986,51 +986,27 @@ const SEED_RECIPES = [
   document.getElementById('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') tryAuth(); });
 })();
 
-// ===== Google Apps Script 連携 =====
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzltcsc1WUqMLUxUkKpbT3UHOF3w3gSfdA_JooTVZMe9Jqfg5OrXMbW3vhyz9MtfQ4i-A/exec';
+// ===== localStorage 操作 =====
+const STORAGE_KEY = 'watashi_no_recipe_book';
 
-async function loadRecipesFromSheet() {
-  return new Promise((resolve) => {
-    const callbackName = 'gasCallback_' + Date.now();
-    window[callbackName] = function(data) {
-      document.head.removeChild(script);
-      delete window[callbackName];
-      if (Array.isArray(data) && data.length > 0) {
-        resolve(data);
-      } else {
-        resolve(SEED_RECIPES.map(r => ({...r})));
-      }
-    };
-    const script = document.createElement('script');
-    script.src = GAS_URL + '?callback=' + callbackName + '&t=' + Date.now();
-    script.onerror = function() {
-      document.head.removeChild(script);
-      delete window[callbackName];
-      resolve(SEED_RECIPES.map(r => ({...r})));
-    };
-    document.head.appendChild(script);
-  });
+function loadRecipes() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch(e) {}
+  saveRecipes(SEED_RECIPES);
+  return SEED_RECIPES.map(r => ({...r}));
 }
 
-async function saveRecipesToSheet(data) {
-  return new Promise((resolve) => {
-    const callbackName = 'gasCallback_' + Date.now();
-    window[callbackName] = function(result) {
-      document.head.removeChild(script);
-      delete window[callbackName];
-      resolve(result);
-    };
-    const script = document.createElement('script');
-    const encoded = encodeURIComponent(JSON.stringify(data));
-    script.src = GAS_URL + '?action=save&data=' + encoded + '&callback=' + callbackName;
-    script.onerror = function() {
-      document.head.removeChild(script);
-      delete window[callbackName];
-      alert('保存に失敗しました。通信状況を確認してください。');
-      resolve(null);
-    };
-    document.head.appendChild(script);
-  });
+function saveRecipes(data) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e) {
+    alert('保存に失敗しました。');
+  }
 }
 
 // ===== State =====
@@ -1038,27 +1014,11 @@ let currentFilter = 'all';
 let currentSearch = '';
 let currentRecipeId = null;
 let editingId = null;
-let recipes = [];
-
-// ===== ローディング表示 =====
-function showLoading() {
-  document.getElementById('recipeList').innerHTML = `
-    <div class="empty">
-      <div class="empty-mark">— 読み込み中 —</div>
-      <div class="empty-text">レシピを取得しています...</div>
-    </div>`;
-}
-
-async function initApp() {
-  showLoading();
-  recipes = await loadRecipesFromSheet();
-  renderFilters();
-  renderList();
-}
+let recipes = loadRecipes();
 
 // ===== Render =====
 function getCategories() {
-  const set = new Set(recipes.map(r => r.category));
+  const set = new Set(recipes.map(r => r.category).filter(c => c));
   return ['all', 'お気に入り', ...Array.from(set)];
 }
 
@@ -1201,7 +1161,7 @@ function closeModal() {
   editingId = null;
 }
 
-async function saveRecipe() {
+function saveRecipe() {
   const title = document.getElementById('fTitle').value.trim();
   const ingredients = document.getElementById('fIngredients').value.trim();
   const steps = document.getElementById('fSteps').value.trim();
@@ -1227,29 +1187,29 @@ async function saveRecipe() {
     const today = new Date().toISOString().slice(0, 10);
     recipes.unshift({ id, ...data, favorite: false, createdAt: today });
   }
-  await saveRecipesToSheet(recipes);
+  saveRecipes(recipes);
   closeModal();
   renderFilters();
   renderList();
   if (editingId && currentRecipeId === editingId) openDetail(editingId);
 }
 
-async function deleteRecipe() {
+function deleteRecipe() {
   if (!editingId) return;
   if (!confirm('このレシピを削除しますか？')) return;
   recipes = recipes.filter(r => r.id !== editingId);
-  await saveRecipesToSheet(recipes);
+  saveRecipes(recipes);
   closeModal();
   closeDetail();
   renderFilters();
   renderList();
 }
 
-async function toggleFav() {
+function toggleFav() {
   if (!currentRecipeId) return;
   const r = recipes.find(x => x.id === currentRecipeId);
   r.favorite = !r.favorite;
-  await saveRecipesToSheet(recipes);
+  saveRecipes(recipes);
   const fav = document.getElementById('favBtn');
   fav.textContent = r.favorite ? '♥' : '♡';
   fav.classList.toggle('active', r.favorite);
@@ -1275,10 +1235,10 @@ document.getElementById('modalBg').addEventListener('click', e => {
 });
 
 // ===== データリセット =====
-document.getElementById('resetBtn').addEventListener('click', async () => {
+document.getElementById('resetBtn').addEventListener('click', () => {
   if (!confirm('すべてのレシピをリセットしますか？\n（初期データに戻ります。この操作は元に戻せません）')) return;
-  await saveRecipesToSheet(SEED_RECIPES);
-  recipes = SEED_RECIPES.map(r => ({...r}));
+  localStorage.removeItem(STORAGE_KEY);
+  recipes = loadRecipes();
   currentFilter = 'all';
   currentSearch = '';
   document.getElementById('searchInput').value = '';
@@ -1287,7 +1247,8 @@ document.getElementById('resetBtn').addEventListener('click', async () => {
 });
 
 // Init
-initApp();
+renderFilters();
+renderList();
 </script>
 </body>
 </html>
