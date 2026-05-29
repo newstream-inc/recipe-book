@@ -990,25 +990,47 @@ const SEED_RECIPES = [
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbzltcsc1WUqMLUxUkKpbT3UHOF3w3gSfdA_JooTVZMe9Jqfg5OrXMbW3vhyz9MtfQ4i-A/exec';
 
 async function loadRecipesFromSheet() {
-  try {
-    const res = await fetch(GAS_URL + '?t=' + Date.now());
-    const json = await res.json();
-    if (Array.isArray(json) && json.length > 0) return json;
-  } catch(e) {}
-  return SEED_RECIPES.map(r => ({...r}));
+  return new Promise((resolve) => {
+    const callbackName = 'gasCallback_' + Date.now();
+    window[callbackName] = function(data) {
+      document.head.removeChild(script);
+      delete window[callbackName];
+      if (Array.isArray(data) && data.length > 0) {
+        resolve(data);
+      } else {
+        resolve(SEED_RECIPES.map(r => ({...r})));
+      }
+    };
+    const script = document.createElement('script');
+    script.src = GAS_URL + '?callback=' + callbackName + '&t=' + Date.now();
+    script.onerror = function() {
+      document.head.removeChild(script);
+      delete window[callbackName];
+      resolve(SEED_RECIPES.map(r => ({...r})));
+    };
+    document.head.appendChild(script);
+  });
 }
 
 async function saveRecipesToSheet(data) {
-  try {
-    await fetch(GAS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(data)
-    });
-  } catch(e) {
-    alert('保存に失敗しました。通信状況を確認してください。');
-  }
+  return new Promise((resolve) => {
+    const callbackName = 'gasCallback_' + Date.now();
+    window[callbackName] = function(result) {
+      document.head.removeChild(script);
+      delete window[callbackName];
+      resolve(result);
+    };
+    const script = document.createElement('script');
+    const encoded = encodeURIComponent(JSON.stringify(data));
+    script.src = GAS_URL + '?action=save&data=' + encoded + '&callback=' + callbackName;
+    script.onerror = function() {
+      document.head.removeChild(script);
+      delete window[callbackName];
+      alert('保存に失敗しました。通信状況を確認してください。');
+      resolve(null);
+    };
+    document.head.appendChild(script);
+  });
 }
 
 // ===== State =====
