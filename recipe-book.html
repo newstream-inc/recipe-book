@@ -690,9 +690,7 @@
     <div class="filters" id="filters"></div>
   </div>
 
-  <div class="data-tools">
-    <button class="data-btn" id="resetBtn">🗑 データをリセット</button>
-  </div>
+
 
   <div class="recipes" id="recipeList"></div>
 </div>
@@ -1375,24 +1373,6 @@ document.getElementById('parseBtn').addEventListener('click', () => {
   if (d.tips) document.getElementById('fTips').value = d.tips;
   if (d.tags) document.getElementById('fTags').value = d.tags.replace(/、/g, ',');
   document.getElementById('fPaste').value = '';
-});
-
-// ===== データリセット =====
-document.getElementById('resetBtn').addEventListener('click', async () => {
-  if (!confirm('すべてのレシピをリセットしますか？\n（初期データに戻ります。この操作は元に戻せません）')) return;
-  // 全削除してシードを再投入
-  await fetch(API + '?id=neq.0', { method: 'DELETE', headers: HEADERS });
-  await insertSeedData();
-  recipes = await loadRecipesFromDB();
-  recipes = recipes.map(r => ({
-    ...r,
-    tags: typeof r.tags === 'string' ? JSON.parse(r.tags) : (r.tags || [])
-  }));
-  currentFilter = 'all';
-  currentSearch = '';
-  document.getElementById('searchInput').value = '';
-  renderFilters();
-  renderList();
 });
 
 // Init
