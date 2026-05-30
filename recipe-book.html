@@ -986,27 +986,99 @@ const SEED_RECIPES = [
   document.getElementById('passInput').addEventListener('keydown', e => { if (e.key === 'Enter') tryAuth(); });
 })();
 
-// ===== localStorage 操作 =====
-const STORAGE_KEY = 'watashi_no_recipe_book';
+// ===== Supabase 連携 =====
+const SUPABASE_URL = 'https://iwhysniujgvyaojgreuu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml3aHlzbml1amd2eWFvamdyZXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNzk4MzIsImV4cCI6MjA5NTY1NTgzMn0.0NR1scvkzI9G2uQ_be3T0P--8-rAQrw9Kq-E3uYV0iM';
+const API = SUPABASE_URL + '/rest/v1/recipes';
+const HEADERS = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
 
-function loadRecipes() {
+async function loadRecipesFromDB() {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
+    const res = await fetch(API + '?order=created_at.asc', { headers: HEADERS });
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) return data;
   } catch(e) {}
-  saveRecipes(SEED_RECIPES);
-  return SEED_RECIPES.map(r => ({...r}));
+  // 初回：シードデータを投入
+  await insertSeedData();
+  return await loadRecipesFromDB();
 }
 
-function saveRecipes(data) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch(e) {
-    alert('保存に失敗しました。');
-  }
+async function insertSeedData() {
+  const rows = SEED_RECIPES.map(r => ({
+    title: r.title,
+    category: r.category,
+    desc: r.desc,
+    servings: r.servings,
+    ingredients: r.ingredients,
+    steps: r.steps,
+    tips: r.tips || '',
+    tags: JSON.stringify(r.tags || []),
+    favorite: r.favorite || false,
+    created_at: r.createdAt
+  }));
+  await fetch(API, {
+    method: 'POST',
+    headers: HEADERS,
+    body: JSON.stringify(rows)
+  });
+}
+
+async function addRecipeToDB(data) {
+  const res = await fetch(API, {
+    method: 'POST',
+    headers: HEADERS,
+    body: JSON.stringify({
+      title: data.title,
+      category: data.category,
+      desc: data.desc,
+      servings: data.servings,
+      ingredients: data.ingredients,
+      steps: data.steps,
+      tips: data.tips || '',
+      tags: JSON.stringify(data.tags || []),
+      favorite: false,
+      created_at: new Date().toISOString().slice(0, 10)
+    })
+  });
+  const rows = await res.json();
+  return rows[0];
+}
+
+async function updateRecipeToDB(id, data) {
+  await fetch(API + '?id=eq.' + id, {
+    method: 'PATCH',
+    headers: HEADERS,
+    body: JSON.stringify({
+      title: data.title,
+      category: data.category,
+      desc: data.desc,
+      servings: data.servings,
+      ingredients: data.ingredients,
+      steps: data.steps,
+      tips: data.tips || '',
+      tags: JSON.stringify(data.tags || [])
+    })
+  });
+}
+
+async function deleteRecipeFromDB(id) {
+  await fetch(API + '?id=eq.' + id, {
+    method: 'DELETE',
+    headers: HEADERS
+  });
+}
+
+async function toggleFavInDB(id, favorite) {
+  await fetch(API + '?id=eq.' + id, {
+    method: 'PATCH',
+    headers: HEADERS,
+    body: JSON.stringify({ favorite })
+  });
 }
 
 // ===== State =====
@@ -1014,7 +1086,28 @@ let currentFilter = 'all';
 let currentSearch = '';
 let currentRecipeId = null;
 let editingId = null;
-let recipes = loadRecipes();
+let recipes = [];
+
+// ===== ローディング表示 =====
+function showLoading() {
+  document.getElementById('recipeList').innerHTML = `
+    <div class="empty">
+      <div class="empty-mark">— 読み込み中 —</div>
+      <div class="empty-text">レシピを取得しています...</div>
+    </div>`;
+}
+
+async function initApp() {
+  showLoading();
+  recipes = await loadRecipesFromDB();
+  // tagsをパース
+  recipes = recipes.map(r => ({
+    ...r,
+    tags: typeof r.tags === 'string' ? JSON.parse(r.tags) : (r.tags || [])
+  }));
+  renderFilters();
+  renderList();
+}
 
 // ===== Render =====
 function getCategories() {
@@ -1161,7 +1254,7 @@ function closeModal() {
   editingId = null;
 }
 
-function saveRecipe() {
+async function saveRecipe() {
   const title = document.getElementById('fTitle').value.trim();
   const ingredients = document.getElementById('fIngredients').value.trim();
   const steps = document.getElementById('fSteps').value.trim();
@@ -1180,36 +1273,36 @@ function saveRecipe() {
     tags: document.getElementById('fTags').value.split(',').map(t => t.trim()).filter(Boolean),
   };
   if (editingId) {
+    await updateRecipeToDB(editingId, data);
     const idx = recipes.findIndex(r => r.id === editingId);
-    recipes[idx] = { ...recipes[idx], ...data };
+    recipes[idx] = { ...recipes[idx], ...data, tags: data.tags || [] };
   } else {
-    const id = 'r' + Date.now();
-    const today = new Date().toISOString().slice(0, 10);
-    recipes.unshift({ id, ...data, favorite: false, createdAt: today });
+    const newRecipe = await addRecipeToDB(data);
+    newRecipe.tags = typeof newRecipe.tags === 'string' ? JSON.parse(newRecipe.tags) : (newRecipe.tags || []);
+    recipes.unshift(newRecipe);
   }
-  saveRecipes(recipes);
   closeModal();
   renderFilters();
   renderList();
   if (editingId && currentRecipeId === editingId) openDetail(editingId);
 }
 
-function deleteRecipe() {
+async function deleteRecipe() {
   if (!editingId) return;
   if (!confirm('このレシピを削除しますか？')) return;
+  await deleteRecipeFromDB(editingId);
   recipes = recipes.filter(r => r.id !== editingId);
-  saveRecipes(recipes);
   closeModal();
   closeDetail();
   renderFilters();
   renderList();
 }
 
-function toggleFav() {
+async function toggleFav() {
   if (!currentRecipeId) return;
   const r = recipes.find(x => x.id === currentRecipeId);
   r.favorite = !r.favorite;
-  saveRecipes(recipes);
+  await toggleFavInDB(r.id, r.favorite);
   const fav = document.getElementById('favBtn');
   fav.textContent = r.favorite ? '♥' : '♡';
   fav.classList.toggle('active', r.favorite);
@@ -1235,10 +1328,16 @@ document.getElementById('modalBg').addEventListener('click', e => {
 });
 
 // ===== データリセット =====
-document.getElementById('resetBtn').addEventListener('click', () => {
+document.getElementById('resetBtn').addEventListener('click', async () => {
   if (!confirm('すべてのレシピをリセットしますか？\n（初期データに戻ります。この操作は元に戻せません）')) return;
-  localStorage.removeItem(STORAGE_KEY);
-  recipes = loadRecipes();
+  // 全削除してシードを再投入
+  await fetch(API + '?id=neq.0', { method: 'DELETE', headers: HEADERS });
+  await insertSeedData();
+  recipes = await loadRecipesFromDB();
+  recipes = recipes.map(r => ({
+    ...r,
+    tags: typeof r.tags === 'string' ? JSON.parse(r.tags) : (r.tags || [])
+  }));
   currentFilter = 'all';
   currentSearch = '';
   document.getElementById('searchInput').value = '';
@@ -1247,8 +1346,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
 });
 
 // Init
-renderFilters();
-renderList();
+initApp();
 </script>
 </body>
 </html>
