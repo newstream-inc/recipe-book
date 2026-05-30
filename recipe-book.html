@@ -722,6 +722,12 @@
       <button class="modal-close" id="modalClose">×</button>
     </div>
 
+    <div class="field" id="pasteArea">
+      <label>Claudeのテキストを貼り付け（任意）</label>
+      <textarea id="fPaste" placeholder="Claudeが出力したテキストをここに貼り付けると自動でフォームに展開されます"></textarea>
+      <button class="btn btn-secondary" id="parseBtn" style="margin-top:8px;width:100%">フォームに展開する</button>
+    </div>
+
     <div class="field">
       <label>料理名 <span style="color:var(--accent)">*</span></label>
       <input type="text" id="fTitle" placeholder="例：にんじんのグラッセ">
@@ -1229,6 +1235,8 @@ function closeDetail() {
 
 // ===== Modal =====
 function openModal(id) {
+  document.getElementById('pasteArea').style.display = id ? 'none' : '';
+  document.getElementById('fPaste').value = '';
   editingId = id || null;
   const m = document.getElementById('modalBg');
   const r = id ? recipes.find(x => String(x.id) === String(id)) : null;
@@ -1325,6 +1333,45 @@ document.getElementById('searchInput').addEventListener('input', e => {
 });
 document.getElementById('modalBg').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
+});
+
+// ===== Claudeテキスト貼り付け→フォーム展開 =====
+function parseClaudeText(text) {
+  const get = (key) => {
+    const re = new RegExp('【' + key + '】\\s*([\\s\\S]*?)(?=【|$)');
+    const m = text.match(re);
+    return m ? m[1].trim() : '';
+  };
+  return {
+    title:       get('料理名'),
+    category:    get('カテゴリ'),
+    desc:        get('ひとこと'),
+    servings:    get('人数'),
+    ingredients: get('材料'),
+    steps:       get('作り方'),
+    tips:        get('コツ・メモ'),
+    tags:        get('タグ')
+  };
+}
+
+document.getElementById('parseBtn').addEventListener('click', () => {
+  const text = document.getElementById('fPaste').value.trim();
+  if (!text) return;
+  const d = parseClaudeText(text);
+  if (d.title) document.getElementById('fTitle').value = d.title;
+  if (d.category) {
+    const sel = document.getElementById('fCategory');
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === d.category) { sel.selectedIndex = i; break; }
+    }
+  }
+  if (d.desc) document.getElementById('fDesc').value = d.desc;
+  if (d.servings) document.getElementById('fServings').value = d.servings;
+  if (d.ingredients) document.getElementById('fIngredients').value = d.ingredients;
+  if (d.steps) document.getElementById('fSteps').value = d.steps;
+  if (d.tips) document.getElementById('fTips').value = d.tips;
+  if (d.tags) document.getElementById('fTags').value = d.tags;
+  document.getElementById('fPaste').value = '';
 });
 
 // ===== データリセット =====
