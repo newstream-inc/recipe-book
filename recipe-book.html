@@ -723,7 +723,10 @@
     </div>
 
     <div class="field" id="pasteArea">
-      <label>Claudeのテキストを貼り付け（任意）</label>
+      <label style="display:flex;justify-content:space-between;align-items:center;">
+        Claudeのテキストを貼り付け（任意）
+        <button class="btn" id="copyBtn" style="font-size:12px;padding:4px 10px;">📋 コピー</button>
+      </label>
       <textarea id="fPaste" placeholder="Claudeが出力したテキストをここに貼り付けると自動でフォームに展開されます"></textarea>
       <button class="btn btn-secondary" id="parseBtn" style="margin-top:8px;width:100%">フォームに展開する</button>
     </div>
@@ -1370,7 +1373,7 @@ document.getElementById('parseBtn').addEventListener('click', () => {
   if (d.ingredients) document.getElementById('fIngredients').value = d.ingredients;
   if (d.steps) document.getElementById('fSteps').value = d.steps;
   if (d.tips) document.getElementById('fTips').value = d.tips;
-  if (d.tags) document.getElementById('fTags').value = d.tags;
+  if (d.tags) document.getElementById('fTags').value = d.tags.replace(/、/g, ',');
   document.getElementById('fPaste').value = '';
 });
 
