@@ -1187,9 +1187,9 @@ function escapeHtml(s) {
 
 // ===== Detail View =====
 function openDetail(id) {
-  const r = recipes.find(x => x.id === id);
+  const r = recipes.find(x => String(x.id) === String(id));
   if (!r) return;
-  currentRecipeId = id;
+  currentRecipeId = r.id;
   const tags = (r.tags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
 
   document.getElementById('detailBody').innerHTML = `
@@ -1231,7 +1231,7 @@ function closeDetail() {
 function openModal(id) {
   editingId = id || null;
   const m = document.getElementById('modalBg');
-  const r = id ? recipes.find(x => x.id === id) : null;
+  const r = id ? recipes.find(x => String(x.id) === String(id)) : null;
   document.getElementById('modalTitle').textContent = r ? 'レシピを編集' : 'レシピを追加';
   document.getElementById('fTitle').value = r ? r.title : '';
   document.getElementById('fCategory').value = r ? r.category : '主菜';
@@ -1274,7 +1274,7 @@ async function saveRecipe() {
   };
   if (editingId) {
     await updateRecipeToDB(editingId, data);
-    const idx = recipes.findIndex(r => r.id === editingId);
+    const idx = recipes.findIndex(r => String(r.id) === String(editingId));
     recipes[idx] = { ...recipes[idx], ...data, tags: data.tags || [] };
   } else {
     const newRecipe = await addRecipeToDB(data);
@@ -1300,7 +1300,7 @@ async function deleteRecipe() {
 
 async function toggleFav() {
   if (!currentRecipeId) return;
-  const r = recipes.find(x => x.id === currentRecipeId);
+  const r = recipes.find(x => String(x.id) === String(currentRecipeId));
   r.favorite = !r.favorite;
   await toggleFavInDB(r.id, r.favorite);
   const fav = document.getElementById('favBtn');
