@@ -1487,6 +1487,11 @@ function openModal(id) {
   editingCookedDates = r ? (r.cooked_dates || []).slice() : [];
   renderCookedDatesList();
   document.getElementById('fCookedDateInput').value = '';
+  document.getElementById('fCookedDateMemo').value = '';
+  const addBtn = document.getElementById('fCookedDateAddBtn');
+  addBtn.textContent = '＋ この日の記録を追加';
+  addBtn.dataset.editIndex = '';
+  addBtn.style.background = '';
   m.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -1628,25 +1633,43 @@ function renderCookedDatesList() {
     list.innerHTML = '<span class="cooked-dates-empty">まだ記録なし</span>';
     return;
   }
-  // ソート用に元のインデックスを保持したまま並び替え
   const sorted = editingCookedDates
     .map((entry, idx) => ({ entry, idx }))
     .sort((a, b) => b.entry.date.localeCompare(a.entry.date));
 
   list.innerHTML = sorted.map(({ entry, idx }) => `
-    <span class="cooked-date-tag" style="flex-direction:column;align-items:flex-start;border-radius:6px;padding:6px 12px;gap:2px;">
-      <span style="display:flex;align-items:center;gap:6px;width:100%;">
-        <span>${formatDate(entry.date)}</span>
-        <button class="remove-date" data-index="${idx}" aria-label="削除" style="margin-left:auto;">×</button>
-      </span>
-      ${entry.memo ? `<span style="font-size:12px;color:var(--ink-mute);font-weight:400;">${escapeHtml(entry.memo)}</span>` : ''}
-    </span>
+    <div class="cooked-date-tag" style="flex-direction:column;align-items:flex-start;border-radius:6px;padding:8px 12px;gap:4px;width:100%;">
+      <div style="display:flex;align-items:center;gap:6px;width:100%;">
+        <span style="font-weight:600;">${formatDate(entry.date)}</span>
+        <button class="edit-date" data-index="${idx}" style="margin-left:auto;background:none;border:none;color:var(--gold);cursor:pointer;font-size:12px;padding:2px 6px;border:1px solid var(--gold);border-radius:3px;">編集</button>
+        <button class="remove-date" data-index="${idx}" aria-label="削除" style="background:none;border:none;color:var(--ink-mute);cursor:pointer;font-size:14px;padding:0 2px;">×</button>
+      </div>
+      ${entry.memo ? `<div style="font-size:12px;color:var(--ink-mute);">${escapeHtml(entry.memo)}</div>` : '<div style="font-size:12px;color:var(--ink-mute);font-style:italic;">メモなし</div>'}
+    </div>
   `).join('');
+
   list.querySelectorAll('.remove-date').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       editingCookedDates.splice(parseInt(btn.dataset.index), 1);
       renderCookedDatesList();
+    });
+  });
+
+  list.querySelectorAll('.edit-date').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.index);
+      const entry = editingCookedDates[idx];
+      // 入力欄に内容を展開
+      document.getElementById('fCookedDateInput').value = entry.date;
+      document.getElementById('fCookedDateMemo').value = entry.memo || '';
+      // 追加ボタンを「上書き保存」モードに切り替え
+      const addBtn = document.getElementById('fCookedDateAddBtn');
+      addBtn.textContent = '✎ 上書き保存';
+      addBtn.dataset.editIndex = idx;
+      addBtn.style.background = 'var(--gold)';
+      document.getElementById('fCookedDateInput').focus();
     });
   });
 }
@@ -1655,12 +1678,29 @@ document.getElementById('fCookedDateAddBtn').addEventListener('click', () => {
   const val = document.getElementById('fCookedDateInput').value;
   if (!val) return;
   const memo = document.getElementById('fCookedDateMemo').value.trim();
-  if (!editingCookedDates.find(e => e.date === val)) {
-    editingCookedDates.push({ date: val, memo });
-    renderCookedDatesList();
+  const addBtn = document.getElementById('fCookedDateAddBtn');
+  const editIndex = addBtn.dataset.editIndex;
+
+  if (editIndex !== undefined && editIndex !== '') {
+    // 上書き保存モード
+    editingCookedDates[parseInt(editIndex)] = { date: val, memo };
+  } else {
+    // 新規追加モード（同じ日付は上書き）
+    const existing = editingCookedDates.findIndex(e => e.date === val);
+    if (existing >= 0) {
+      editingCookedDates[existing] = { date: val, memo };
+    } else {
+      editingCookedDates.push({ date: val, memo });
+    }
   }
+
+  // 入力欄とボタンをリセット
   document.getElementById('fCookedDateInput').value = '';
   document.getElementById('fCookedDateMemo').value = '';
+  addBtn.textContent = '＋ この日の記録を追加';
+  addBtn.dataset.editIndex = '';
+  addBtn.style.background = '';
+  renderCookedDatesList();
 });
 
 // ===== Tabs =====
