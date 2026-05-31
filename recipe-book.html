@@ -1520,7 +1520,7 @@ async function saveRecipe() {
   if (editingId) {
     await updateRecipeToDB(editingId, data);
     const idx = recipes.findIndex(r => String(r.id) === String(editingId));
-    recipes[idx] = { ...recipes[idx], ...data, tags: data.tags || [] };
+    recipes[idx] = { ...recipes[idx], ...data, tags: data.tags || [], cooked_dates: editingCookedDates.slice() };
   } else {
     const newRecipe = await addRecipeToDB(data);
     newRecipe.tags = typeof newRecipe.tags === 'string' ? JSON.parse(newRecipe.tags) : (newRecipe.tags || []);
@@ -1627,18 +1627,20 @@ function renderCookedDatesList() {
     list.innerHTML = '<span class="cooked-dates-empty">まだ記録なし</span>';
     return;
   }
-  list.innerHTML = editingCookedDates.slice().sort((a,b) => b.date.localeCompare(a.date)).map((entry, _) => {
-    const idx = editingCookedDates.findIndex(e => e.date === entry.date);
-    return `
-      <span class="cooked-date-tag" style="flex-direction:column;align-items:flex-start;border-radius:6px;padding:6px 12px;gap:2px;">
-        <span style="display:flex;align-items:center;gap:6px;width:100%;">
-          <span>${formatDate(entry.date)}</span>
-          <button class="remove-date" data-index="${idx}" aria-label="削除" style="margin-left:auto;">×</button>
-        </span>
-        ${entry.memo ? `<span style="font-size:12px;color:var(--ink-mute);font-weight:400;">${escapeHtml(entry.memo)}</span>` : ''}
+  // ソート用に元のインデックスを保持したまま並び替え
+  const sorted = editingCookedDates
+    .map((entry, idx) => ({ entry, idx }))
+    .sort((a, b) => b.entry.date.localeCompare(a.entry.date));
+
+  list.innerHTML = sorted.map(({ entry, idx }) => `
+    <span class="cooked-date-tag" style="flex-direction:column;align-items:flex-start;border-radius:6px;padding:6px 12px;gap:2px;">
+      <span style="display:flex;align-items:center;gap:6px;width:100%;">
+        <span>${formatDate(entry.date)}</span>
+        <button class="remove-date" data-index="${idx}" aria-label="削除" style="margin-left:auto;">×</button>
       </span>
-    `;
-  }).join('');
+      ${entry.memo ? `<span style="font-size:12px;color:var(--ink-mute);font-weight:400;">${escapeHtml(entry.memo)}</span>` : ''}
+    </span>
+  `).join('');
   list.querySelectorAll('.remove-date').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
