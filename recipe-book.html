@@ -978,11 +978,12 @@
     <div class="field">
       <label>作った日付（任意）</label>
       <div class="cooked-dates-list" id="fCookedDatesList"></div>
-      <div class="add-date-row">
-        <input type="date" id="fCookedDateInput">
-        <button class="add-date-btn" id="fCookedDateAddBtn">＋追加</button>
+      <div style="margin-top:10px;border:1.5px solid var(--paper-deep);border-radius:6px;padding:14px;background:var(--paper-warm);">
+        <div style="font-size:12px;color:var(--ink-mute);margin-bottom:10px;letter-spacing:0.05em;">新しい記録を追加</div>
+        <input type="date" id="fCookedDateInput" style="width:100%;padding:10px 12px;border:1.5px solid var(--paper-deep);background:var(--paper);border-radius:3px;font-family:'Zen Kaku Gothic New',sans-serif;font-size:14px;color:var(--ink);outline:none;margin-bottom:8px;box-sizing:border-box;">
+        <textarea id="fCookedDateMemo" placeholder="メモ（感想・気づきなど）" style="width:100%;padding:10px 12px;border:1.5px solid var(--paper-deep);background:var(--paper);border-radius:3px;font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;color:var(--ink);outline:none;min-height:72px;resize:vertical;box-sizing:border-box;margin-bottom:12px;" onfocus="this.style.borderColor='var(--leaf)'" onblur="this.style.borderColor='var(--paper-deep)'"></textarea>
+        <button class="add-date-btn" id="fCookedDateAddBtn" style="width:100%;padding:11px;font-size:14px;">＋ この日の記録を追加</button>
       </div>
-      <textarea id="fCookedDateMemo" placeholder="メモ（感想・気づきなど）" style="margin-top:8px;font-size:13px;min-height:60px;resize:vertical;width:100%;padding:10px 12px;border:1.5px solid var(--paper-deep);background:var(--paper-warm);border-radius:3px;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--ink);outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--leaf)'" onblur="this.style.borderColor='var(--paper-deep)'"></textarea>
     </div>
 
     <div class="modal-actions">
