@@ -102,7 +102,7 @@
 
   /* ===== Search & Filters ===== */
   .controls {
-    padding: 24px 20px 16px;
+    padding: 0 0 0;
     position: sticky;
     top: 0;
     background: var(--paper);
@@ -670,7 +670,92 @@
   .card:nth-child(5) { animation-delay: 0.14s; }
   .card:nth-child(n+6) { animation-delay: 0.17s; }
 
-  /* ===== 作った日付 ===== */
+  /* ===== Tabs ===== */
+  .tabs {
+    display: flex;
+    border-bottom: 2px solid var(--paper-deep);
+    margin: 0 20px;
+    gap: 0;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 14px 8px;
+    background: none;
+    border: none;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink-mute);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* ===== Diary ===== */
+  .diary {
+    padding: 20px;
+    display: none;
+  }
+
+  .diary.visible { display: block; }
+
+  .diary-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 18px;
+    background: var(--paper-warm);
+    border: 1px solid var(--paper-deep);
+    border-radius: 4px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .diary-item::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--gold);
+  }
+
+  .diary-item:active { transform: scale(0.98); }
+  .diary-item:hover { box-shadow: 0 4px 12px var(--shadow); }
+
+  .diary-date {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-mute);
+    white-space: nowrap;
+    min-width: 90px;
+  }
+
+  .diary-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+
+  .diary-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--ink-mute);
+    font-size: 14px;
+  }
+</style>
   .cooked-dates-section {
     margin-top: 28px;
   }
@@ -785,19 +870,24 @@
   </header>
 
   <div class="controls">
-    <div class="search">
-      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="7"></circle>
-        <path d="m21 21-4.3-4.3"></path>
-      </svg>
-      <input type="text" id="searchInput" placeholder="材料や料理名で検索...">
+    <div class="tabs">
+      <button class="tab-btn active" id="tabRecipes">Recipes</button>
+      <button class="tab-btn" id="tabDiary">Diary</button>
     </div>
-    <div class="filters" id="filters"></div>
+    <div id="recipeControls" style="padding:16px 0 0">
+      <div class="search" style="margin-top:16px">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input type="text" id="searchInput" placeholder="材料や料理名で検索...">
+      </div>
+      <div class="filters" id="filters"></div>
+    </div>
   </div>
 
-
-
   <div class="recipes" id="recipeList"></div>
+  <div class="diary" id="diaryList"></div>
 </div>
 
 
@@ -1271,7 +1361,11 @@ function getFiltered() {
       return blob.includes(q);
     });
   }
-  return result.slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  return result.slice().sort((a, b) => {
+    const da = b.created_at || b.createdAt || '';
+    const db = a.created_at || a.createdAt || '';
+    return da.localeCompare(db);
+  });
 }
 
 function renderList() {
@@ -1546,6 +1640,57 @@ document.getElementById('fCookedDateAddBtn').addEventListener('click', () => {
   }
   document.getElementById('fCookedDateInput').value = '';
 });
+
+// ===== Tabs =====
+let currentTab = 'recipes';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tabRecipes').classList.toggle('active', tab === 'recipes');
+  document.getElementById('tabDiary').classList.toggle('active', tab === 'diary');
+  document.getElementById('recipeControls').style.display = tab === 'recipes' ? '' : 'none';
+  document.getElementById('recipeList').style.display = tab === 'recipes' ? '' : 'none';
+  const diary = document.getElementById('diaryList');
+  if (tab === 'diary') {
+    diary.classList.add('visible');
+    renderDiary();
+  } else {
+    diary.classList.remove('visible');
+  }
+}
+
+function renderDiary() {
+  const root = document.getElementById('diaryList');
+  // すべてのレシピの作った日付を展開してフラットなリストに
+  const entries = [];
+  recipes.forEach(r => {
+    (r.cooked_dates || []).forEach(d => {
+      entries.push({ date: d, recipe: r });
+    });
+  });
+  // 新しい順にソート
+  entries.sort((a, b) => b.date.localeCompare(a.date));
+
+  if (entries.length === 0) {
+    root.innerHTML = `<div class="diary-empty">作った記録がまだありません。<br>レシピ編集画面から日付を登録できます。</div>`;
+    return;
+  }
+  root.innerHTML = entries.map(e => `
+    <div class="diary-item" data-id="${e.recipe.id}">
+      <div class="diary-date">${formatDate(e.date)}</div>
+      <div class="diary-title">${escapeHtml(e.recipe.title)}</div>
+    </div>
+  `).join('');
+  root.querySelectorAll('.diary-item').forEach(el => {
+    el.addEventListener('click', () => {
+      switchTab('recipes');
+      openDetail(el.dataset.id);
+    });
+  });
+}
+
+document.getElementById('tabRecipes').addEventListener('click', () => switchTab('recipes'));
+document.getElementById('tabDiary').addEventListener('click', () => switchTab('diary'));
 
 // Init
 initApp();
