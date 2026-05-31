@@ -5,26 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="レシピ集">
-<meta name="theme-color" content="#3a2a1f">
-<title>わたしのレシピ帖</title>
+<meta name="theme-color" content="#1e3a6e">
+<title>Shiibar's Secret Recipes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=Zen+Kaku+Gothic+New:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #2a1f17;
-    --ink-soft: #4a3a2e;
-    --ink-mute: #806a5a;
-    --paper: #f5ede0;
-    --paper-warm: #ede0cc;
-    --paper-deep: #e0d0b8;
-    --accent: #b8431f;
-    --accent-deep: #8a3014;
-    --accent-soft: #d96a3d;
-    --leaf: #5a6e3a;
-    --gold: #c89a4a;
-    --shadow: rgba(58, 42, 31, 0.15);
-    --shadow-deep: rgba(58, 42, 31, 0.3);
+    --ink: #1a2744;
+    --ink-soft: #2e3f62;
+    --ink-mute: #6b7a99;
+    --paper: #f0f4f8;
+    --paper-warm: #e8edf5;
+    --paper-deep: #d0d9e8;
+    --accent: #1e3a6e;
+    --accent-deep: #122456;
+    --accent-soft: #2e5090;
+    --leaf: #3d6b8e;
+    --gold: #4a7ab5;
+    --shadow: rgba(26, 39, 68, 0.12);
+    --shadow-deep: rgba(26, 39, 68, 0.25);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -41,9 +41,9 @@
 
   body {
     background-image:
-      radial-gradient(circle at 20% 10%, rgba(184, 67, 31, 0.04) 0%, transparent 40%),
-      radial-gradient(circle at 80% 90%, rgba(90, 110, 58, 0.04) 0%, transparent 40%),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.16 0 0 0 0 0.12 0 0 0 0 0.09 0 0 0 0.025 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      radial-gradient(circle at 20% 10%, rgba(30, 58, 110, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(61, 107, 142, 0.05) 0%, transparent 40%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.10 0 0 0 0 0.13 0 0 0 0 0.20 0 0 0 0.02 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   .app {
@@ -74,7 +74,7 @@
 
   .header-mark {
     display: inline-block;
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 11px;
     letter-spacing: 0.4em;
     color: var(--accent);
@@ -83,7 +83,7 @@
   }
 
   .header h1 {
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-weight: 700;
     font-size: 34px;
     letter-spacing: 0.05em;
@@ -92,7 +92,7 @@
   }
 
   .header .sub {
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 12px;
     letter-spacing: 0.3em;
     color: var(--ink-mute);
@@ -160,7 +160,7 @@
     border: 1.5px solid var(--paper-deep);
     background: transparent;
     border-radius: 100px;
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 13px;
     font-weight: 500;
     color: var(--ink-soft);
@@ -185,7 +185,7 @@
   }
 
   .recipe-count {
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 12px;
     letter-spacing: 0.2em;
     color: var(--ink-mute);
@@ -233,13 +233,13 @@
   }
 
   .card-cat {
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 10px;
     letter-spacing: 0.2em;
     color: var(--accent);
     font-weight: 600;
     padding: 3px 8px;
-    background: rgba(184, 67, 31, 0.08);
+    background: rgba(30, 58, 110, 0.08);
     border-radius: 2px;
   }
 
@@ -249,7 +249,7 @@
   }
 
   .card h2 {
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 20px;
     font-weight: 600;
     color: var(--ink);
@@ -287,14 +287,14 @@
   }
 
   .empty-mark {
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 32px;
     color: var(--paper-deep);
     margin-bottom: 16px;
   }
 
   .empty-text {
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 14px;
     letter-spacing: 0.1em;
   }
@@ -313,7 +313,7 @@
     font-size: 30px;
     font-weight: 300;
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(184, 67, 31, 0.4);
+    box-shadow: 0 4px 16px rgba(30, 58, 110, 0.35);
     z-index: 20;
     transition: transform 0.2s;
     display: flex;
@@ -369,7 +369,7 @@
     color: var(--ink);
     cursor: pointer;
     padding: 8px;
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 14px;
     display: flex;
     align-items: center;
@@ -387,7 +387,7 @@
   }
 
   .detail-cat {
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 11px;
     letter-spacing: 0.3em;
     color: var(--accent);
@@ -396,7 +396,7 @@
   }
 
   .detail-body h1 {
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 28px;
     font-weight: 700;
     color: var(--ink);
@@ -414,7 +414,7 @@
   }
 
   .section-title {
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 16px;
     font-weight: 700;
     color: var(--accent-deep);
@@ -427,7 +427,7 @@
 
   .servings {
     display: inline-block;
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 13px;
     color: var(--ink-mute);
     margin-bottom: 14px;
@@ -454,7 +454,7 @@
   .ingredients .recipe-text { color: var(--ink); }
 
   .tip {
-    background: rgba(200, 154, 74, 0.1);
+    background: rgba(74, 122, 181, 0.1);
     padding: 16px 20px;
     border-radius: 4px;
     border-left: 3px solid var(--gold);
@@ -465,7 +465,7 @@
   }
 
   .tip-label {
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 12px;
     letter-spacing: 0.2em;
     color: var(--gold);
@@ -478,7 +478,7 @@
   .modal-bg {
     position: fixed;
     inset: 0;
-    background: rgba(42, 31, 23, 0.5);
+    background: rgba(26, 39, 68, 0.5);
     z-index: 200;
     opacity: 0;
     pointer-events: none;
@@ -517,7 +517,7 @@
   }
 
   .modal-header h2 {
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 20px;
     font-weight: 700;
     color: var(--ink);
@@ -538,7 +538,7 @@
 
   .field label {
     display: block;
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 13px;
     color: var(--ink-soft);
     margin-bottom: 6px;
@@ -594,7 +594,7 @@
     padding: 14px;
     border: 1.5px solid;
     border-radius: 3px;
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 14px;
     font-weight: 600;
     letter-spacing: 0.1em;
@@ -644,7 +644,7 @@
     border: 1px solid var(--paper-deep);
     border-radius: 100px;
     padding: 6px 14px;
-    font-family: 'Shippori Mincho', serif;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
     font-size: 12px;
     color: var(--ink-mute);
     cursor: pointer;
@@ -669,14 +669,119 @@
   .card:nth-child(4) { animation-delay: 0.11s; }
   .card:nth-child(5) { animation-delay: 0.14s; }
   .card:nth-child(n+6) { animation-delay: 0.17s; }
+
+  /* ===== 作った日付 ===== */
+  .cooked-dates-section {
+    margin-top: 28px;
+  }
+
+  .cooked-dates-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+    min-height: 28px;
+  }
+
+  .cooked-date-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 13px;
+    color: var(--leaf);
+    background: rgba(61, 107, 142, 0.08);
+    border: 1px solid rgba(61, 107, 142, 0.25);
+    border-radius: 100px;
+    padding: 4px 12px;
+  }
+
+  .cooked-date-tag .remove-date {
+    background: none;
+    border: none;
+    color: var(--ink-mute);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .cooked-dates-empty {
+    font-size: 13px;
+    color: var(--ink-mute);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    letter-spacing: 0.05em;
+  }
+
+  .add-date-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    align-items: center;
+  }
+
+  .add-date-row input[type="date"] {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1.5px solid var(--paper-deep);
+    background: var(--paper-warm);
+    border-radius: 3px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .add-date-row input[type="date"]:focus {
+    border-color: var(--leaf);
+  }
+
+  .add-date-btn {
+    padding: 10px 16px;
+    background: var(--leaf);
+    color: var(--paper);
+    border: none;
+    border-radius: 3px;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+  }
+
+  .add-date-btn:active { opacity: 0.7; }
+
+  /* 詳細画面の作った日付エリア */
+  .detail-cooked-dates {
+    background: rgba(61, 107, 142, 0.06);
+    padding: 16px 20px;
+    border-radius: 4px;
+    border-left: 3px solid var(--leaf);
+    margin-top: 20px;
+  }
+
+  .detail-cooked-dates .cooked-label {
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: var(--leaf);
+    font-weight: 700;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .detail-cooked-dates .cooked-dates-list {
+    margin-top: 0;
+  }
 </style>
 </head>
 <body>
 <div class="app">
   <header class="header">
     <div class="header-mark">RECIPE BOOK</div>
-    <h1>わたしのレシピ帖</h1>
-    <div class="sub">— 椎葉さんのお料理メモ —</div>
+    <h1>Shiibar's Secret Recipes</h1>
   </header>
 
   <div class="controls">
@@ -777,6 +882,15 @@
     <div class="field">
       <label>タグ（カンマ区切り、任意）</label>
       <input type="text" id="fTags" placeholder="例：簡単, 作り置き, 和風">
+    </div>
+
+    <div class="field">
+      <label>作った日付（任意）</label>
+      <div class="cooked-dates-list" id="fCookedDatesList"></div>
+      <div class="add-date-row">
+        <input type="date" id="fCookedDateInput">
+        <button class="add-date-btn" id="fCookedDateAddBtn">＋追加</button>
+      </div>
     </div>
 
     <div class="modal-actions">
@@ -972,11 +1086,11 @@ const SEED_RECIPES = [
   const bg = document.createElement('div');
   bg.style.cssText = 'position:fixed;inset:0;background:var(--paper);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
   bg.innerHTML = `
-    <div style="font-family:\'Shippori Mincho\',serif;font-size:13px;letter-spacing:0.3em;color:var(--accent);margin-bottom:4px;">RECIPE BOOK</div>
-    <div style="font-family:\'Shippori Mincho\',serif;font-size:28px;font-weight:700;color:var(--ink);margin-bottom:8px;">わたしのレシピ帖</div>
+    <div style="font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;letter-spacing:0.3em;color:var(--accent);margin-bottom:4px;">RECIPE BOOK</div>
+    <div style="font-family:'Zen Kaku Gothic New',sans-serif;font-size:28px;font-weight:700;color:var(--ink);margin-bottom:8px;">Shiibar's Secret Recipes</div>
     <input id="passInput" type="password" placeholder="パスワードを入力" style="padding:12px 16px;border:1.5px solid var(--paper-deep);background:var(--paper-warm);border-radius:3px;font-size:15px;color:var(--ink);outline:none;width:240px;text-align:center;font-family:\'Zen Kaku Gothic New\',sans-serif;">
-    <button id="passBtn" style="padding:12px 32px;background:var(--accent);color:var(--paper);border:none;border-radius:3px;font-family:\'Shippori Mincho\',serif;font-size:14px;font-weight:600;letter-spacing:0.1em;cursor:pointer;">開く</button>
-    <div id="passErr" style="color:var(--accent);font-size:13px;font-family:\'Shippori Mincho\',serif;min-height:20px;"></div>
+    <button id="passBtn" style="padding:12px 32px;background:var(--accent);color:var(--paper);border:none;border-radius:3px;font-family:'Zen Kaku Gothic New',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.1em;cursor:pointer;">開く</button>
+    <div id="passErr" style="color:var(--accent);font-size:13px;font-family:'Zen Kaku Gothic New',sans-serif;min-height:20px;"></div>
   `;
   document.body.appendChild(bg);
   function tryAuth() {
@@ -1049,6 +1163,7 @@ async function addRecipeToDB(data) {
       tips: data.tips || '',
       tags: JSON.stringify(data.tags || []),
       favorite: false,
+      cooked_dates: JSON.stringify(data.cooked_dates || []),
       created_at: new Date().toISOString().slice(0, 10)
     })
   });
@@ -1068,7 +1183,8 @@ async function updateRecipeToDB(id, data) {
       ingredients: data.ingredients,
       steps: data.steps,
       tips: data.tips || '',
-      tags: JSON.stringify(data.tags || [])
+      tags: JSON.stringify(data.tags || []),
+      cooked_dates: JSON.stringify(data.cooked_dates || [])
     })
   });
 }
@@ -1094,6 +1210,7 @@ let currentSearch = '';
 let currentRecipeId = null;
 let editingId = null;
 let recipes = [];
+let editingCookedDates = [];
 
 // ===== ローディング表示 =====
 function showLoading() {
@@ -1110,7 +1227,8 @@ async function initApp() {
   // tagsをパース
   recipes = recipes.map(r => ({
     ...r,
-    tags: typeof r.tags === 'string' ? JSON.parse(r.tags) : (r.tags || [])
+    tags: typeof r.tags === 'string' ? JSON.parse(r.tags) : (r.tags || []),
+    cooked_dates: typeof r.cooked_dates === 'string' ? JSON.parse(r.cooked_dates || '[]') : (r.cooked_dates || [])
   }));
   renderFilters();
   renderList();
@@ -1218,6 +1336,14 @@ function openDetail(id) {
       </div>` : ''}
 
     ${tags ? `<div class="card-tags" style="margin-top:24px">${tags}</div>` : ''}
+
+    ${(r.cooked_dates && r.cooked_dates.length > 0) ? `
+      <div class="detail-cooked-dates">
+        <span class="cooked-label">— 作った日 —</span>
+        <div class="cooked-dates-list">
+          ${r.cooked_dates.slice().sort().reverse().map(d => `<span class="cooked-date-tag">${formatDate(d)}</span>`).join('')}
+        </div>
+      </div>` : ''}
   `;
 
   const fav = document.getElementById('favBtn');
@@ -1251,6 +1377,10 @@ function openModal(id) {
   document.getElementById('fTips').value = r ? (r.tips || '') : '';
   document.getElementById('fTags').value = r ? (r.tags || []).join(', ') : '';
   document.getElementById('deleteBtn').style.display = r ? 'block' : 'none';
+  // 作った日付
+  editingCookedDates = r ? (r.cooked_dates || []).slice() : [];
+  renderCookedDatesList();
+  document.getElementById('fCookedDateInput').value = '';
   m.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -1280,6 +1410,7 @@ async function saveRecipe() {
     steps,
     tips: document.getElementById('fTips').value.trim(),
     tags: document.getElementById('fTags').value.split(',').map(t => t.trim()).filter(Boolean),
+    cooked_dates: editingCookedDates.slice(),
   };
   if (editingId) {
     await updateRecipeToDB(editingId, data);
@@ -1288,6 +1419,7 @@ async function saveRecipe() {
   } else {
     const newRecipe = await addRecipeToDB(data);
     newRecipe.tags = typeof newRecipe.tags === 'string' ? JSON.parse(newRecipe.tags) : (newRecipe.tags || []);
+    newRecipe.cooked_dates = typeof newRecipe.cooked_dates === 'string' ? JSON.parse(newRecipe.cooked_dates || '[]') : (newRecipe.cooked_dates || []);
     recipes.unshift(newRecipe);
   }
   closeModal();
@@ -1373,6 +1505,46 @@ document.getElementById('parseBtn').addEventListener('click', () => {
   if (d.tips) document.getElementById('fTips').value = d.tips;
   if (d.tags) document.getElementById('fTags').value = d.tags.replace(/、/g, ',');
   document.getElementById('fPaste').value = '';
+});
+
+// ===== 作った日付ユーティリティ =====
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+}
+
+function renderCookedDatesList() {
+  const list = document.getElementById('fCookedDatesList');
+  if (!list) return;
+  if (editingCookedDates.length === 0) {
+    list.innerHTML = '<span class="cooked-dates-empty">まだ記録なし</span>';
+    return;
+  }
+  list.innerHTML = editingCookedDates.slice().sort().reverse().map((d, i) => `
+    <span class="cooked-date-tag">
+      ${formatDate(d)}
+      <button class="remove-date" data-index="${editingCookedDates.indexOf(d)}" aria-label="削除">×</button>
+    </span>
+  `).join('');
+  list.querySelectorAll('.remove-date').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.index);
+      editingCookedDates.splice(idx, 1);
+      renderCookedDatesList();
+    });
+  });
+}
+
+document.getElementById('fCookedDateAddBtn').addEventListener('click', () => {
+  const val = document.getElementById('fCookedDateInput').value;
+  if (!val) return;
+  if (!editingCookedDates.includes(val)) {
+    editingCookedDates.push(val);
+    renderCookedDatesList();
+  }
+  document.getElementById('fCookedDateInput').value = '';
 });
 
 // Init
