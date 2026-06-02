@@ -1589,7 +1589,9 @@ function parseClaudeText(text) {
   const get = (key) => {
     const re = new RegExp('【' + key + '】\\s*([\\s\\S]*?)(?=【|$)');
     const m = text.match(re);
-    return m ? m[1].trim() : '';
+    if (!m) return '';
+    // 各行の行頭スペース・タブを除去
+    return m[1].trim().split('\n').map(l => l.replace(/^[\s\t]+/, '')).join('\n');
   };
   return {
     title:       get('料理名'),
