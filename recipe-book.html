@@ -1438,6 +1438,12 @@ function nl2br(s) {
   return escapeHtml(s).replace(/\n/g, '<br>');
 }
 
+// 各行の行頭タブ・スペースを除去する（iPhoneのリスト貼り付けズレ対策）
+function cleanLines(s) {
+  if (!s) return '';
+  return s.split('\n').map(line => line.replace(/^[\t ]+/, '')).join('\n');
+}
+
 // ===== Detail View =====
 function openDetail(id) {
   const r = recipes.find(x => String(x.id) === String(id));
@@ -1452,10 +1458,10 @@ function openDetail(id) {
 
     <div class="section-title">材料</div>
     ${r.servings ? `<div class="servings">${escapeHtml(r.servings)}</div>` : ''}
-    <div class="ingredients"><div class="recipe-text">${escapeHtml(r.ingredients)}</div></div>
+    <div class="ingredients"><div class="recipe-text">${escapeHtml(cleanLines(r.ingredients))}</div></div>
 
     <div class="section-title">作り方</div>
-    <div class="recipe-text">${escapeHtml(r.steps)}</div>
+    <div class="recipe-text">${escapeHtml(cleanLines(r.steps))}</div>
 
     ${r.tips ? `
       <div class="tip">
