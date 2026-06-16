@@ -900,6 +900,7 @@
     <div class="detail-header">
       <button class="back-btn" id="backBtn">← 一覧に戻る</button>
       <div class="detail-actions">
+        <button class="icon-btn" id="copyRecipeBtn" aria-label="テキストをコピー" title="テキストをコピー" style="font-size:17px;">📄</button>
         <button class="icon-btn hof-btn" id="hofBtn" aria-label="殿堂入り" title="殿堂入り">🏆</button>
         <button class="icon-btn fav-btn" id="favBtn" aria-label="お気に入り">♡</button>
         <button class="icon-btn" id="editBtn" aria-label="編集">✎</button>
@@ -1594,7 +1595,31 @@ async function toggleFav() {
 }
 
 // ===== Events =====
-document.getElementById('addBtn').addEventListener('click', () => openModal());
+function copyRecipeText() {
+  if (!currentRecipeId) return;
+  const r = recipes.find(x => String(x.id) === String(currentRecipeId));
+  if (!r) return;
+  const text = [
+    `【料理名】${r.title}`,
+    `【カテゴリ】${r.category}`,
+    `【ひとこと】${r.desc || ''}`,
+    `【人数】${r.servings || ''}`,
+    `【材料】\n${r.ingredients}`,
+    `【作り方】\n${r.steps}`,
+    r.tips ? `【コツ・メモ】${r.tips}` : null,
+    `【タグ】${(r.tags || []).join(',')}`,
+  ].filter(Boolean).join('\n');
+
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyRecipeBtn');
+    btn.textContent = '✅';
+    setTimeout(() => { btn.textContent = '📄'; }, 1800);
+  }).catch(() => {
+    alert('コピーに失敗しました。');
+  });
+}
+
+document.getElementById('copyRecipeBtn').addEventListener('click', copyRecipeText);
 document.getElementById('backBtn').addEventListener('click', closeDetail);
 document.getElementById('editBtn').addEventListener('click', () => openModal(currentRecipeId));
 document.getElementById('hofBtn').addEventListener('click', toggleHof);
