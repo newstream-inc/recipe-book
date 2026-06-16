@@ -1619,6 +1619,7 @@ function copyRecipeText() {
   });
 }
 
+document.getElementById('addBtn').addEventListener('click', () => openModal(null));
 document.getElementById('copyRecipeBtn').addEventListener('click', copyRecipeText);
 document.getElementById('backBtn').addEventListener('click', closeDetail);
 document.getElementById('editBtn').addEventListener('click', () => openModal(currentRecipeId));
