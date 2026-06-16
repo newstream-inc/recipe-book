@@ -900,6 +900,7 @@
     <div class="detail-header">
       <button class="back-btn" id="backBtn">← 一覧に戻る</button>
       <div class="detail-actions">
+        <button class="icon-btn hof-btn" id="hofBtn" aria-label="殿堂入り" title="殿堂入り">🏆</button>
         <button class="icon-btn fav-btn" id="favBtn" aria-label="お気に入り">♡</button>
         <button class="icon-btn" id="editBtn" aria-label="編集">✎</button>
       </div>
@@ -917,10 +918,7 @@
     </div>
 
     <div class="field" id="pasteArea">
-      <label style="display:flex;justify-content:space-between;align-items:center;">
-        Claudeのテキストを貼り付け（任意）
-        <button class="btn" id="copyBtn" style="font-size:12px;padding:4px 10px;">📋 コピー</button>
-      </label>
+      <label>Claudeのテキストを貼り付け（任意）</label>
       <textarea id="fPaste" placeholder="Claudeが出力したテキストをここに貼り付けると自動でフォームに展開されます"></textarea>
       <button class="btn btn-secondary" id="parseBtn" style="margin-top:8px;width:100%">フォームに展開する</button>
     </div>
@@ -1297,6 +1295,26 @@ async function toggleFavInDB(id, favorite) {
   });
 }
 
+async function toggleHofInDB(id, hall_of_fame) {
+  await fetch(API + '?id=eq.' + id, {
+    method: 'PATCH',
+    headers: HEADERS,
+    body: JSON.stringify({ hall_of_fame })
+  });
+}
+
+async function toggleHof() {
+  if (!currentRecipeId) return;
+  const r = recipes.find(x => String(x.id) === String(currentRecipeId));
+  r.hall_of_fame = !r.hall_of_fame;
+  await toggleHofInDB(r.id, r.hall_of_fame);
+  const hof = document.getElementById('hofBtn');
+  hof.style.opacity = r.hall_of_fame ? '1' : '0.35';
+  hof.title = r.hall_of_fame ? '殿堂入り解除' : '殿堂入りにする';
+  renderFilters();
+  renderList();
+}
+
 // ===== State =====
 let currentFilter = 'all';
 let currentSearch = '';
@@ -1320,6 +1338,7 @@ async function initApp() {
   // tagsをパース
   recipes = recipes.map(r => ({
     ...r,
+    hall_of_fame: r.hall_of_fame || false,
     tags: typeof r.tags === 'string' ? JSON.parse(r.tags) : (r.tags || []),
     cooked_dates: (() => {
       const raw = typeof r.cooked_dates === 'string' ? JSON.parse(r.cooked_dates || '[]') : (r.cooked_dates || []);
@@ -1334,7 +1353,7 @@ async function initApp() {
 // ===== Render =====
 function getCategories() {
   const set = new Set(recipes.map(r => r.category).filter(c => c));
-  return ['all', 'お気に入り', ...Array.from(set)];
+  return ['all', '殿堂入り', 'お気に入り', ...Array.from(set)];
 }
 
 function renderFilters() {
@@ -1356,7 +1375,9 @@ function renderFilters() {
 
 function getFiltered() {
   let result = recipes;
-  if (currentFilter === 'お気に入り') {
+  if (currentFilter === '殿堂入り') {
+    result = result.filter(r => r.hall_of_fame);
+  } else if (currentFilter === 'お気に入り') {
     result = result.filter(r => r.favorite);
   } else if (currentFilter !== 'all') {
     result = result.filter(r => r.category === currentFilter);
@@ -1393,6 +1414,7 @@ function renderList() {
       <div class="card" data-id="${r.id}">
         <div class="card-meta">
           <span class="card-cat">${escapeHtml(r.category)}</span>
+          ${r.hall_of_fame ? '<span class="card-hof">🏆</span>' : ''}
           ${r.favorite ? '<span class="card-fav">♥</span>' : ''}
         </div>
         <h2>${escapeHtml(r.title)}</h2>
@@ -1424,7 +1446,7 @@ function openDetail(id) {
 
   document.getElementById('detailBody').innerHTML = `
     <div class="detail-cat">${escapeHtml(r.category)}</div>
-    <h1>${escapeHtml(r.title)}</h1>
+    <h1>${escapeHtml(r.title)}${r.hall_of_fame ? ' <span style="font-size:22px;">🏆</span>' : ''}</h1>
     ${r.desc ? `<div class="desc">${escapeHtml(r.desc)}</div>` : ''}
 
     <div class="section-title">材料</div>
@@ -1455,6 +1477,10 @@ function openDetail(id) {
         </div>
       </div>` : ''}
   `;
+
+  const hof = document.getElementById('hofBtn');
+  hof.style.opacity = r.hall_of_fame ? '1' : '0.35';
+  hof.title = r.hall_of_fame ? '殿堂入り解除' : '殿堂入りにする';
 
   const fav = document.getElementById('favBtn');
   fav.textContent = r.favorite ? '♥' : '♡';
@@ -1571,6 +1597,7 @@ async function toggleFav() {
 document.getElementById('addBtn').addEventListener('click', () => openModal());
 document.getElementById('backBtn').addEventListener('click', closeDetail);
 document.getElementById('editBtn').addEventListener('click', () => openModal(currentRecipeId));
+document.getElementById('hofBtn').addEventListener('click', toggleHof);
 document.getElementById('favBtn').addEventListener('click', toggleFav);
 document.getElementById('modalClose').addEventListener('click', closeModal);
 document.getElementById('cancelBtn').addEventListener('click', closeModal);
@@ -1589,9 +1616,7 @@ function parseClaudeText(text) {
   const get = (key) => {
     const re = new RegExp('【' + key + '】\\s*([\\s\\S]*?)(?=【|$)');
     const m = text.match(re);
-    if (!m) return '';
-    // 各行の行頭スペース・タブを除去
-    return m[1].trim().split('\n').map(l => l.replace(/^[\s\t]+/, '')).join('\n');
+    return m ? m[1].trim() : '';
   };
   return {
     title:       get('料理名'),
