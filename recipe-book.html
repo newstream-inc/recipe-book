@@ -1648,6 +1648,12 @@ function copyRecipeText() {
   });
 }
 
+// ===== イベントリスナー =====
+// 【改修チェックリスト】ボタンを追加・削除した場合は以下を必ず確認すること：
+// 1. HTMLに id="***" のボタンが存在するか
+// 2. ここに addEventListener が書かれているか
+// 3. モーダル・詳細画面・FABそれぞれが正しく開閉できるか（特にFABは見落としやすい）
+document.getElementById('addBtn').addEventListener('click', () => openModal(null));
 document.getElementById('copyRecipeBtn').addEventListener('click', copyRecipeText);
 document.getElementById('backBtn').addEventListener('click', closeDetail);
 document.getElementById('editBtn').addEventListener('click', () => openModal(currentRecipeId));
