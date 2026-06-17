@@ -902,6 +902,7 @@
       <div class="detail-actions">
         <button class="icon-btn" id="copyRecipeBtn" aria-label="テキストをコピー" title="テキストをコピー" style="font-size:17px;">📄</button>
         <button class="icon-btn hof-btn" id="hofBtn" aria-label="殿堂入り" title="殿堂入り">🏆</button>
+        <button class="icon-btn next-up-btn" id="nextUpBtn" aria-label="次回候補" title="次回候補">🎯</button>
         <button class="icon-btn fav-btn" id="favBtn" aria-label="お気に入り">♡</button>
         <button class="icon-btn" id="editBtn" aria-label="編集">✎</button>
       </div>
@@ -1304,6 +1305,14 @@ async function toggleHofInDB(id, hall_of_fame) {
   });
 }
 
+async function toggleNextUpInDB(id, next_up) {
+  await fetch(API + '?id=eq.' + id, {
+    method: 'PATCH',
+    headers: HEADERS,
+    body: JSON.stringify({ next_up })
+  });
+}
+
 async function toggleHof() {
   if (!currentRecipeId) return;
   const r = recipes.find(x => String(x.id) === String(currentRecipeId));
@@ -1312,6 +1321,18 @@ async function toggleHof() {
   const hof = document.getElementById('hofBtn');
   hof.style.opacity = r.hall_of_fame ? '1' : '0.35';
   hof.title = r.hall_of_fame ? '殿堂入り解除' : '殿堂入りにする';
+  renderFilters();
+  renderList();
+}
+
+async function toggleNextUp() {
+  if (!currentRecipeId) return;
+  const r = recipes.find(x => String(x.id) === String(currentRecipeId));
+  r.next_up = !r.next_up;
+  await toggleNextUpInDB(r.id, r.next_up);
+  const nextUp = document.getElementById('nextUpBtn');
+  nextUp.style.opacity = r.next_up ? '1' : '0.35';
+  nextUp.title = r.next_up ? '次回候補から外す' : '次回候補にする';
   renderFilters();
   renderList();
 }
@@ -1340,6 +1361,7 @@ async function initApp() {
   recipes = recipes.map(r => ({
     ...r,
     hall_of_fame: r.hall_of_fame || false,
+    next_up: r.next_up || false,
     tags: typeof r.tags === 'string' ? JSON.parse(r.tags) : (r.tags || []),
     cooked_dates: (() => {
       const raw = typeof r.cooked_dates === 'string' ? JSON.parse(r.cooked_dates || '[]') : (r.cooked_dates || []);
@@ -1354,7 +1376,7 @@ async function initApp() {
 // ===== Render =====
 function getCategories() {
   const set = new Set(recipes.map(r => r.category).filter(c => c));
-  return ['all', '殿堂入り', 'お気に入り', ...Array.from(set)];
+  return ['all', '殿堂入り', '次回候補', 'お気に入り', ...Array.from(set)];
 }
 
 function renderFilters() {
@@ -1378,6 +1400,8 @@ function getFiltered() {
   let result = recipes;
   if (currentFilter === '殿堂入り') {
     result = result.filter(r => r.hall_of_fame);
+  } else if (currentFilter === '次回候補') {
+    result = result.filter(r => r.next_up);
   } else if (currentFilter === 'お気に入り') {
     result = result.filter(r => r.favorite);
   } else if (currentFilter !== 'all') {
@@ -1416,6 +1440,7 @@ function renderList() {
         <div class="card-meta">
           <span class="card-cat">${escapeHtml(r.category)}</span>
           ${r.hall_of_fame ? '<span class="card-hof">🏆</span>' : ''}
+          ${r.next_up ? '<span class="card-next-up">🎯</span>' : ''}
           ${r.favorite ? '<span class="card-fav">♥</span>' : ''}
         </div>
         <h2>${escapeHtml(r.title)}</h2>
@@ -1438,12 +1463,6 @@ function nl2br(s) {
   return escapeHtml(s).replace(/\n/g, '<br>');
 }
 
-// 各行の行頭タブ・スペースを除去する（iPhoneのリスト貼り付けズレ対策）
-function cleanLines(s) {
-  if (!s) return '';
-  return s.split('\n').map(line => line.replace(/^[\t ]+/, '')).join('\n');
-}
-
 // ===== Detail View =====
 function openDetail(id) {
   const r = recipes.find(x => String(x.id) === String(id));
@@ -1453,15 +1472,15 @@ function openDetail(id) {
 
   document.getElementById('detailBody').innerHTML = `
     <div class="detail-cat">${escapeHtml(r.category)}</div>
-    <h1>${escapeHtml(r.title)}${r.hall_of_fame ? ' <span style="font-size:22px;">🏆</span>' : ''}</h1>
+    <h1>${escapeHtml(r.title)}${r.hall_of_fame ? ' <span style="font-size:22px;">🏆</span>' : ''}${r.next_up ? ' <span style="font-size:22px;">🎯</span>' : ''}</h1>
     ${r.desc ? `<div class="desc">${escapeHtml(r.desc)}</div>` : ''}
 
     <div class="section-title">材料</div>
     ${r.servings ? `<div class="servings">${escapeHtml(r.servings)}</div>` : ''}
-    <div class="ingredients"><div class="recipe-text">${escapeHtml(cleanLines(r.ingredients))}</div></div>
+    <div class="ingredients"><div class="recipe-text">${escapeHtml(r.ingredients)}</div></div>
 
     <div class="section-title">作り方</div>
-    <div class="recipe-text">${escapeHtml(cleanLines(r.steps))}</div>
+    <div class="recipe-text">${escapeHtml(r.steps)}</div>
 
     ${r.tips ? `
       <div class="tip">
@@ -1488,6 +1507,10 @@ function openDetail(id) {
   const hof = document.getElementById('hofBtn');
   hof.style.opacity = r.hall_of_fame ? '1' : '0.35';
   hof.title = r.hall_of_fame ? '殿堂入り解除' : '殿堂入りにする';
+
+  const nextUp = document.getElementById('nextUpBtn');
+  nextUp.style.opacity = r.next_up ? '1' : '0.35';
+  nextUp.title = r.next_up ? '次回候補から外す' : '次回候補にする';
 
   const fav = document.getElementById('favBtn');
   fav.textContent = r.favorite ? '♥' : '♡';
@@ -1625,11 +1648,11 @@ function copyRecipeText() {
   });
 }
 
-document.getElementById('addBtn').addEventListener('click', () => openModal(null));
 document.getElementById('copyRecipeBtn').addEventListener('click', copyRecipeText);
 document.getElementById('backBtn').addEventListener('click', closeDetail);
 document.getElementById('editBtn').addEventListener('click', () => openModal(currentRecipeId));
 document.getElementById('hofBtn').addEventListener('click', toggleHof);
+document.getElementById('nextUpBtn').addEventListener('click', toggleNextUp);
 document.getElementById('favBtn').addEventListener('click', toggleFav);
 document.getElementById('modalClose').addEventListener('click', closeModal);
 document.getElementById('cancelBtn').addEventListener('click', closeModal);
